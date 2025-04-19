@@ -279,6 +279,34 @@ class OverclockTower(Tower):
         # Создаем прямоугольник для врага
         enemy_rect = pygame.Rect(enemy.position[0], enemy.position[1], 15, 15)  # Враг размером 40x40
         return bullet_rect.colliderect(enemy_rect)
+    
+class FarmTower(Tower):
+    def __init__(self, position,coefficient):
+        super().__init__(position,coefficient)
+        self.range = 0
+        self.attack_speed = 0
+        self.damage = 25  # Можно уменьшить урон, если необходимо
+        self.upgrade_price = 50  # Стоимость улучшения для быстрой башни
+        self.color = (255, 255, 70)  # Цвет башни (синий)
+        self.price = 70
+
+
+    def upgrade(self):
+        self.damage += 15  # Увеличиваем урон
+
+        self.level += 1  # Увеличиваем уровень
+        self.upgrade_price = round(self.upgrade_price * 1.5)  # Обновляем стоимость улучшения
+
+    def shoot(self, enemies):
+        pass
+    def update_bullets(self,enemies):
+        pass
+    def draw(self, screen):
+        # Отрисовка башни
+        pygame.draw.rect(screen, self.color, ((self.position[0] * 40 + 5)* self.coefficient, (self.position[1] * 40 + 5)* self.coefficient, self.size, self.size))
+        pygame.draw.circle(screen, (225, 225, 70), ((self.position[0] * 40 + 20)* self.coefficient, (self.position[1] * 40 + 20)* self.coefficient), self.size/2)
+        level_text = self.font.render(f'{self.level}', True, (255, 255, 255))  # Белый цвет текста
+        screen.blit(level_text, ((self.position[0] * 40 + 5)* self.coefficient, (self.position[1] * 40 + 5)* self.coefficient))
 
 class Bullet:
     def __init__(self, start_position, target_position, damage,speed,coefficient):

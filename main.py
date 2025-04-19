@@ -2,7 +2,7 @@ import os
 from cryptography.fernet import Fernet
 import pygame
 import sys
-from tower import Tower,FastTower,RocketTower,ExplosiveTower,OverclockTower
+from tower import Tower,FastTower,RocketTower,ExplosiveTower,OverclockTower,FarmTower
 from enemy import Basic,Fast,Strong,Boss
 from settings import Settings
 from pygame_stuff import Button
@@ -91,7 +91,8 @@ class Game:
             pygame.K_2: ('Fast', FastTower((0, 0),self.coefficient).price),
             pygame.K_3: ('Rocket', RocketTower((0, 0),self.coefficient).price),
             pygame.K_4: ('Explosive', ExplosiveTower((0, 0),self.coefficient).price),
-            pygame.K_5: ('Overclock', OverclockTower((0, 0),self.coefficient).price)
+            pygame.K_5: ('Overclock', OverclockTower((0, 0),self.coefficient).price),
+            pygame.K_6: ('Farm', FarmTower((0, 0),self.coefficient).price)
             }
             if event.type == pygame.KEYDOWN:
                 if event.key in self.tower_types:
@@ -110,6 +111,8 @@ class Game:
                     tower = ExplosiveTower((grid_x, grid_y),self.coefficient)  
                 elif self.selected_tower_type == 'Overclock':
                     tower = OverclockTower((grid_x, grid_y),self.coefficient)  
+                elif self.selected_tower_type == 'Farm':
+                    tower = FarmTower((grid_x, grid_y),self.coefficient)  
                 if self.economy >= tower.price: 
                     self.build_tower((grid_x, grid_y)) 
                     self.economy -= tower.price 
@@ -129,6 +132,8 @@ class Game:
             self.towers.append(ExplosiveTower(position,self.coefficient)) 
         elif self.selected_tower_type == 'Overclock':
             self.towers.append(OverclockTower(position,self.coefficient))
+        elif self.selected_tower_type == 'Farm':
+            self.towers.append(FarmTower(position,self.coefficient))
         self.grid[position[1]][position[0]] = 1  
 
     def upgrade_tower(self):
@@ -193,10 +198,13 @@ class Game:
 
     
         for enemy in self.enemies:
-            if enemy.update(delta_time):
+            if enemy.update(delta_time) and enemy == Boss:
+                self.base_health -= 100  
+                self.enemies.remove(enemy)                 
+            if enemy.update(delta_time) and not enemy == Boss:
                 self.base_health -= 10  
                 self.enemies.remove(enemy) 
-
+            
         if not self.enemies and self.enemies_spawned > 0:
             if (self.wave + 1) % 20 == 0:
                 self.enemies.append(Boss(self.path,(5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier,self.coefficient))
@@ -208,7 +216,9 @@ class Game:
             for tower in self.towers:
                 if isinstance(tower, OverclockTower):
                     tower.new_wave()
-
+            for tower in self.towers:
+                if isinstance(tower, FarmTower):
+                    self.economy += tower.damage
 
         for tower in self.towers:
             tower.shoot(self.enemies)  
