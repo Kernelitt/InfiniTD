@@ -13,7 +13,7 @@ class Menu:
         self.resolution = Settings.read_screen_resolution()
         self.coefficient = (self.resolution[0] + self.resolution[1]) / (self.WIDTH + self.HEIGHT)
         self.screen = pygame.display.set_mode((self.WIDTH * self.coefficient, self.HEIGHT * self.coefficient))
-        pygame.display.set_caption("TDPro")
+        pygame.display.set_caption("InfiniTD")
 
         self.WHITE = (25, 25, 25)
         self.BLACK = (255, 255, 255)
@@ -98,16 +98,18 @@ class Menu:
 
 
                 self.screen.fill(self.WHITE)
-                for i in self.squares:
-                    i.draw()
-                title_surface = self.font.render("Главное меню", True, self.BLACK)
+
+
+                title_surface = self.font.render("Main Menu", True, self.BLACK)
                 self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
 
                 self.menu_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Play", (10, 10))], lambda:self.level_menu(), (0, 200, 0)))
 
-
+                for i in self.squares:
+                    i.draw()
                 for button in self.menu_buttons:
                     button.draw(self.screen, self.font)
+
                 text = self.font.render("Money "+str(self.green_papers), True, (255, 255, 255))
                 text_rect = text.get_rect(topleft=(1500*self.coefficient, 50*self.coefficient))
                 self.screen.blit(text, text_rect)
@@ -136,7 +138,7 @@ class Menu:
             while self.level_select:
                 self.screen.fill(self.WHITE)
 
-                self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 100*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.level_menu, (0, 200, 0)))
+                self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.level_menu, (0, 200, 0)))
 
                 self.level_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Start Level", (10, 10))], self.start_game, (0, 200, 0)))
 
