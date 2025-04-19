@@ -1,0 +1,186 @@
+import pygame
+from os.path import basename
+import sys
+from cryptography.fernet import Fernet
+from tkinter import filedialog
+from settings import Settings
+from pygame_stuff import Button, RotatingSquare
+
+class Menu:
+    def __init__(self):
+        pygame.init()
+        self.WIDTH, self.HEIGHT = 1800, 1000
+        self.resolution = Settings.read_screen_resolution()
+        self.coefficient = (self.resolution[0] + self.resolution[1]) / (self.WIDTH + self.HEIGHT)
+        self.screen = pygame.display.set_mode((self.WIDTH * self.coefficient, self.HEIGHT * self.coefficient))
+        pygame.display.set_caption("TDPro")
+
+        self.WHITE = (25, 25, 25)
+        self.BLACK = (255, 255, 255)
+        self.GREEN = (0, 205, 0)
+        self.RED = (255, 0, 0)
+
+        self.font = pygame.font.Font(None, int(54 * self.coefficient))
+        self.font_small = pygame.font.Font(None, int(36 * self.coefficient))
+
+        self.wave = 0
+        self.curl = 0
+        self.menu_active = True
+        self.level_select = False
+        self.current_level = 1
+
+        self.settings = Settings()
+        self.custom_level_var = False
+        self.custom_level = ""
+
+        self.start_money = self.settings.load_data()["StartMoney"]
+        self.start_money_upgrade_price = self.settings.load_data()["StartMoneyUpgradePrice"]
+
+        self.green_papers = self.settings.load_data()["Money"]
+
+        pygame.mixer.music.load("music\Seablue - Aurora Dawn.mp3")
+        pygame.mixer.music.play(-1)
+
+        self.squares = []
+        self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (0, 0, 255), 0))
+        self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (255, 155, 0), 72))
+        self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (255, 0, 155), 144))
+        self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (255, 155, 155), 216))
+        self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (205, 0, 70), 288))
+
+        self.level_buttons = []
+        self.menu_buttons = []
+
+        for i in range(1, 11):
+            self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
+        self.level_buttons.append(Button(20 * self.coefficient, 800 * self.coefficient, 300 * self.coefficient, 50 * self.coefficient, [("Custom level", (10, 10))], lambda: self.set_custom_lvl(), (0, 200, 0)))
+        self.menu_buttons.append(Button(400 * self.coefficient, 900 * self.coefficient, 390 * self.coefficient, 80 * self.coefficient, [("Upgrade Start Money", (0, 0)), (str(self.start_money_upgrade_price), (10, 50)), (str(self.start_money), (400, 25))], lambda: self.upgrade_start_money(), (0, 200, 0)))
+    
+    def set_custom_lvl(self):
+        self.custom_level = filedialog.askopenfilename()
+        if self.custom_level != None: 
+            self.custom_level_var = True
+
+    def level_menu(self):
+        if self.level_select == False:
+            self.menu_active = False
+            self.level_select = True
+        else:
+            self.menu_active = True
+            self.level_select = False
+
+
+    def get_waves_for_level(self,level):
+        data = self.settings.load_data()  
+        if "Levels" in data:    
+            if self.custom_level_var == True:
+                waves = data["Levels"].get(str(level), 0)  # Возвращаем 0, если уровень не найден
+            else:
+                waves = data["Levels"].get("levels\lvl"+str(level)+".json", 0)  # Возвращаем
+        else:
+            waves = 0
+        return waves
+
+    def upgrade_start_money(self):
+        if self.green_papers >= self.start_money_upgrade_price:
+            self.green_papers -= self.start_money_upgrade_price
+            self.start_money += 10  # увеличение стартового кол-ва денег
+            self.start_money_upgrade_price *= 3  # увеличение цены улучшения
+            self.settings.save_data({"Money": self.green_papers, "StartMoney": self.start_money, "StartMoneyUpgradePrice": self.start_money_upgrade_price})
+
+    def main_menu(self):
+        self.menu_active = True
+        wave = self.get_waves_for_level(self.current_level)
+        self.green_papers = self.settings.load_data()["Money"]
+        while True:
+            while self.menu_active:
+
+
+
+                self.screen.fill(self.WHITE)
+                for i in self.squares:
+                    i.draw()
+                title_surface = self.font.render("Главное меню", True, self.BLACK)
+                self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
+
+                self.menu_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Play", (10, 10))], lambda:self.level_menu(), (0, 200, 0)))
+
+
+                for button in self.menu_buttons:
+                    button.draw(self.screen, self.font)
+                text = self.font.render("Money "+str(self.green_papers), True, (255, 255, 255))
+                text_rect = text.get_rect(topleft=(1500*self.coefficient, 50*self.coefficient))
+                self.screen.blit(text, text_rect)
+
+
+
+                #data = settings.load_data()  # Загружаем все данные
+                #text = font_small.render(str(data), True, (255, 255, 255))  # Добавляем отступ сверху и снизу
+                #text_rect = text.get_rect(topleft=(10, 850))
+                #screen.blit(text, text_rect)
+
+
+
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    for button in self.menu_buttons:
+                        button.check_click(event)
+
+                pygame.display.flip()
+
+
+
+            while self.level_select:
+                self.screen.fill(self.WHITE)
+
+                self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 100*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.level_menu, (0, 200, 0)))
+
+                self.level_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Start Level", (10, 10))], self.start_game, (0, 200, 0)))
+
+                text = self.font.render("Wave Record "+str(wave), True, (255, 255, 255))
+                text_rect = text.get_rect(topleft=(1300*self.coefficient, 700*self.coefficient))
+                self.screen.blit(text, text_rect)
+
+                if self.custom_level_var:
+                    filename = basename(self.custom_level) 
+                    text = self.font.render("Level "+filename, True, (255, 255, 255))
+                else:
+                    text = self.font.render("Level "+str(self.current_level), True, (255, 255, 255))          
+                text_rect = text.get_rect(topleft=(1300*self.coefficient, 600*self.coefficient))
+                self.screen.blit(text, text_rect)
+
+                for button in self.level_buttons:
+                    button.draw(self.screen, self.font)
+
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    for button in self.level_buttons:
+                        button.check_click(event)
+
+                pygame.display.flip()
+
+    def start_game(self):
+        from main import Game
+
+        self.menu_active = False  # Скрываем меню
+        self.level_select = False  # Скрываем меню
+        if self.custom_level_var == False:
+            game = Game(self.settings, self.screen, "levels\lvl"+str(self.current_level)+".json",self.coefficient)  # Создаем экземпляр игры с текущим уровнем и экраном
+        else:
+            game = Game(self.settings, self.screen, self.custom_level,self.coefficient)  #
+        game.run()  # Запускаем игровой цикл
+
+        self.main_menu()
+
+    def set_current_level(self,level):
+        self.current_level = level
+        self.custom_level_var = False
+    
+if __name__ == "__main__":
+    menu = Menu()
+    menu.main_menu()
