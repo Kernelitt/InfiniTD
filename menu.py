@@ -51,6 +51,8 @@ class Menu:
         self.level_buttons = []
         self.menu_buttons = []
 
+        self.bossrush = False
+
         for i in range(1, 11):
             self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
         self.level_buttons.append(Button(20 * self.coefficient, 800 * self.coefficient, 300 * self.coefficient, 50 * self.coefficient, [("Custom level", (10, 10))], lambda: self.set_custom_lvl(), (0, 200, 0)))
@@ -88,6 +90,13 @@ class Menu:
             self.start_money_upgrade_price *= 3  # увеличение цены улучшения
             self.settings.save_data({"Money": self.green_papers, "StartMoney": self.start_money, "StartMoneyUpgradePrice": self.start_money_upgrade_price})
 
+    def change_bossrush(self):
+        if self.bossrush == True:
+            self.bossrush = False
+        else:
+            self.bossrush = True
+
+
     def main_menu(self):
         self.menu_active = True
         wave = self.get_waves_for_level(self.current_level)
@@ -114,16 +123,6 @@ class Menu:
                 text_rect = text.get_rect(topleft=(1500*self.coefficient, 50*self.coefficient))
                 self.screen.blit(text, text_rect)
 
-
-
-                #data = settings.load_data()  # Загружаем все данные
-                #text = font_small.render(str(data), True, (255, 255, 255))  # Добавляем отступ сверху и снизу
-                #text_rect = text.get_rect(topleft=(10, 850))
-                #screen.blit(text, text_rect)
-
-
-
-
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -141,6 +140,9 @@ class Menu:
                 self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.level_menu, (0, 200, 0)))
 
                 self.level_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Start Level", (10, 10))], self.start_game, (0, 200, 0)))
+                self.level_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 350*self.coefficient, 50*self.coefficient, [("Boss Rush "+str(self.bossrush), (10, 10))], lambda:self.change_bossrush(), (0, 200, 0)))
+
+                wave = self.get_waves_for_level(self.current_level)
 
                 text = self.font.render("Wave Record "+str(wave), True, (255, 255, 255))
                 text_rect = text.get_rect(topleft=(1300*self.coefficient, 700*self.coefficient))
@@ -172,9 +174,9 @@ class Menu:
         self.menu_active = False  # Скрываем меню
         self.level_select = False  # Скрываем меню
         if self.custom_level_var == False:
-            game = Game(self.settings, self.screen, "levels\lvl"+str(self.current_level)+".json",self.coefficient)  # Создаем экземпляр игры с текущим уровнем и экраном
+            game = Game(self.settings, self.screen, "levels\lvl"+str(self.current_level)+".json",self.coefficient,self.bossrush)  # Создаем экземпляр игры с текущим уровнем и экраном
         else:
-            game = Game(self.settings, self.screen, self.custom_level,self.coefficient)  #
+            game = Game(self.settings, self.screen, self.custom_level,self.coefficient,self.bossrush)  #
         game.run()  # Запускаем игровой цикл
 
         self.main_menu()

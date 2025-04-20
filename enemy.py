@@ -126,7 +126,7 @@ class Boss(Basic):
         self.health = round(health * 100) # Начальное здоровье врага
         self.current_path_index = 0  # Индекс текущей точки пути
         self.position = ((path[0][0] * 40 + 20)*coefficient, (path[0][1] * 40 + 20)*coefficient)  # Центр первой клетки
-
+        self.bonus_enemies = []
     def draw(self, screen,max_health):
         # Рисуем врага как круг
 
@@ -151,3 +151,28 @@ class Boss(Basic):
         health_text = str(int(self.health)) 
         text_surface = font.render(health_text, True, (255, 255, 255))
         screen.blit(text_surface, (self.position[0] - health_bar_length / 2 + 5, self.position[1] - 58))
+
+    def update(self, delta_time):
+        if self.current_path_index < len(self.path):
+            target = self.path[self.current_path_index]
+            target_position = ((target[0] * 40 + 20)*self.coefficient, (target[1] * 40 + 20)*self.coefficient)
+
+            direction = (
+                target_position[0] - self.position[0],
+                target_position[1] - self.position[1]
+            )
+            distance = (direction[0] ** 2 + direction[1] ** 2) ** 0.5
+
+            if distance > 0:
+                direction = (direction[0] / distance, direction[1] / distance)
+                self.position = (
+                    self.position[0] + direction[0] * self.speed * delta_time,
+                    self.position[1] + direction[1] * self.speed * delta_time
+                )
+
+            if distance < self.speed * delta_time:
+                self.current_path_index += 1  # Переходим к следующей точке пути
+
+        # Проверяем, достигли ли мы конца пути
+        return self.current_path_index >= len(self.path)
+    

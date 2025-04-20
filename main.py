@@ -11,7 +11,7 @@ import json
 
 
 class Game:
-    def __init__(self, settings, screen,current_level,coefficient):
+    def __init__(self, settings, screen,current_level,coefficient,bossrush):
         self.current_level = current_level
         self.settings = settings
         self.screen = screen
@@ -37,6 +37,13 @@ class Game:
         self.load_map(current_level)
         self.green_papers = 0
         self.selected_tower_price = 24
+        self.bossrush = bossrush
+
+        if self.bossrush == True:
+            pygame.mixer.music.load("music/4mat - Blank Page.mp3")
+            pygame.mixer.music.play(-1)
+
+
 
     def load_map(self, file_path):
         with open(file_path, 'r') as file:
@@ -145,38 +152,45 @@ class Game:
         enemy_types = [Basic, Fast, Strong,Boss]  
         self.max_health = (40 + 5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier
         health = (40 + 5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier
+        if self.bossrush == False:
+            if self.wave < len(self.custom_waves):
+                wave_data = self.custom_waves[self.wave]
+                if self.group_num < len(wave_data): 
+                    group_data = wave_data[self.group_num]
 
-        if self.wave < len(self.custom_waves):
-            wave_data = self.custom_waves[self.wave]
-            if self.group_num < len(wave_data): 
-                group_data = wave_data[self.group_num]
+                    if self.enemies_spawned == self.enemy_count:
+                        self.enemy_type = enemy_types[int(group_data[0]) - 1]
+                        self.enemy_count = int(group_data[1])
+                        self.enemy_spawn_interval = int(group_data[2])
+                        self.enemies_spawned = 0  
+                        self.group_num += 1  
 
-                if self.enemies_spawned == self.enemy_count:
-                    self.enemy_type = enemy_types[int(group_data[0]) - 1]
-                    self.enemy_count = int(group_data[1])
-                    self.enemy_spawn_interval = int(group_data[2])
-                    self.enemies_spawned = 0  
-                    self.group_num += 1  
-
+                    else:
+                        new_enemy = self.enemy_type(self.path, health, self.coefficient)
+                        new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
+                        self.enemies.append(new_enemy)
+                        self.enemies_spawned += 1
                 else:
-                    new_enemy = self.enemy_type(self.path, health, self.coefficient)
+                    if not self.enemies:
+                        self.group_num = 0  
+                        self.wave += 1  
+                        self.enemies_spawned = 0 
+                        self.max_enemies_per_wave += 0.3  
+                        self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier
+                        for tower in self.towers:
+                            if isinstance(tower, OverclockTower):
+                                tower.new_wave()
+            else:
+                self.enemy_spawn_interval = 500
+                if self.enemies_spawned < self.max_enemies_per_wave:
+                    enemy_type = enemy_types[self.wave % len([Basic, Fast, Strong])]
+                    new_enemy = enemy_type(self.path, health, self.coefficient)
                     new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
                     self.enemies.append(new_enemy)
-                    self.enemies_spawned += 1
-            else:
-                if not self.enemies:
-                    self.group_num = 0  
-                    self.wave += 1  
-                    self.enemies_spawned = 0 
-                    self.max_enemies_per_wave += 0.3  
-                    self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier
-                    for tower in self.towers:
-                        if isinstance(tower, OverclockTower):
-                            tower.new_wave()
+                    self.enemies_spawned += 1 
         else:
-            self.enemy_spawn_interval = 500
-            if self.enemies_spawned < self.max_enemies_per_wave:
-                enemy_type = enemy_types[self.wave % len([Basic, Fast, Strong])]
+            if self.enemies_spawned < 1:
+                enemy_type = Boss
                 new_enemy = enemy_type(self.path, health, self.coefficient)
                 new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
                 self.enemies.append(new_enemy)
@@ -193,15 +207,16 @@ class Game:
 
         for enemy in self.enemies:
             if enemy.is_alive() == False:
-                self.economy += 1 + 1 * round(self.wave * 0.15)
+                if isinstance(enemy, Boss):
+                    self.economy += 25 + 25 * round(self.wave * 0.15)
+                else:
+                    self.economy += 1 + 1 * round(self.wave * 0.15)
                 self.enemies.remove(enemy)
 
-    
-        for enemy in self.enemies:
-            if enemy.update(delta_time) and enemy == Boss:
+            if enemy.update(delta_time) and isinstance(enemy, Boss):
                 self.base_health -= 100  
                 self.enemies.remove(enemy)                 
-            if enemy.update(delta_time) and not enemy == Boss:
+            if enemy.update(delta_time) and not isinstance(enemy, Boss):
                 self.base_health -= 10  
                 self.enemies.remove(enemy) 
             
@@ -368,6 +383,7 @@ class Game:
         settings = Settings() 
         from menu import Menu
         while True:
+            pygame.time.Clock().tick(120)  # Ограничить FPS до 60 кадров в секунду
             self.check_events()
             self.update()
             self.draw()
