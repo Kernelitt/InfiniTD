@@ -5,7 +5,7 @@ class Basic:
     def __init__(self, path, health,coefficient):
         self.coefficient = coefficient
         self.path = path
-        self.speed = 40 * self.coefficient
+        self.speed = 35 * self.coefficient
         self.health = health  # Начальное здоровье врага
         self.position = ((path[0][0] * 40 + 20)*coefficient, (path[0][1] * 40 + 20)*coefficient)  # Центр первой клетки
         self.current_path_index = 0  # Индекс текущей точки пути
@@ -54,17 +54,14 @@ class Basic:
 
 # Ограничиваем ширину полоски здоровья, чтобы она не превышала максимальную длину
         health_bar_width = max(0, health_bar_width)  # Убедитесь, что ширина не отрицательная
-
-    # Отрисовка фона полоски здоровья
         pygame.draw.rect(screen, (25, 25, 25), (self.position[0] - health_bar_length / 2, self.position[1] - 20, health_bar_length, 7* self.coefficient))  # Фоновая полоса здоровья
-    # Отрисовка зеленой полоски здоровья
         pygame.draw.rect(screen, (0, 255, 0), (self.position[0] - health_bar_length / 2, self.position[1] - 20, health_bar_width, 5* self.coefficient))  # Зеленая полоса здоровья
 
 class Fast(Basic):
     def __init__(self, path, health,coefficient):
         self.coefficient = coefficient        
         self.path = path
-        self.speed = 70* self.coefficient
+        self.speed = 60* self.coefficient
         self.health = round(health / 1.8) # Начальное здоровье врага
         self.current_path_index = 0  # Индекс текущей точки пути
         self.position = ((path[0][0] * 40 + 20)*coefficient, (path[0][1] * 40 + 20)*coefficient)  # Центр первой клетки
@@ -93,7 +90,7 @@ class Strong(Basic):
     def __init__(self, path, health,coefficient):
         self.coefficient = coefficient
         self.path = path
-        self.speed = 30* self.coefficient
+        self.speed = 25* self.coefficient
         self.health = round(health * 1.5) # Начальное здоровье врага
         self.current_path_index = 0  # Индекс текущей точки пути
         self.position = ((path[0][0] * 40 + 20)*coefficient, (path[0][1] * 40 + 20)*coefficient)  # Центр первой клетки

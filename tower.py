@@ -17,6 +17,8 @@ class Tower:
         self.speed = 6
         self.price = 24
         self.font = pygame.font.Font(None, 24)  # Инициализация шрифта
+        self.xp_level = 0
+        self.xp = 0
 
 
 
@@ -47,6 +49,7 @@ class Tower:
             for enemy in enemies:
                 if enemy.is_alive() and self.check_collision(bullet, enemy):
                     enemy.take_damage(bullet.damage)  # Наносим урон врагу
+                    self.xp += bullet.damage
                     self.bullets.remove(bullet)  # Удаляем пулю
                     break  # Выходим из цикла после столкновения
 
@@ -67,6 +70,12 @@ class Tower:
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
 
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 1
+            self.range += 1
+
     def is_in_range(self, enemy):
      # Преобразуем позицию башни из клеток в пиксели
         tower_pixel_x = (self.position[0] * 40 + 20)* self.coefficient  # 50 - размер клетки, 20 - смещение для центрирования
@@ -79,7 +88,7 @@ class Tower:
 
     def upgrade(self):
         self.damage += 8  # Увеличиваем урон
-        self.range = round(self.range * 1.05)  # Увеличиваем радиус на 5%
+        self.range += 15 # Увеличиваем радиус на 5%
         self.attack_speed += 0.3  # Увеличиваем скорость атаки
         self.level += 1  # Увеличиваем уровень
         self.upgrade_price = round(self.upgrade_price * 1.5)  # Обновляем стоимость улучшения
@@ -103,6 +112,13 @@ class FastTower(Tower):
         screen.blit(level_text, ((self.position[0] * 40 + 5)*self.coefficient, (self.position[1] * 40 + 5)*self.coefficient))
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
+
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 0.25
+            self.attack_speed += 0.05
+            self.range += 2
 
     def upgrade(self):
         self.damage += 2  # Увеличиваем урон
@@ -136,6 +152,14 @@ class RocketTower(Tower):
         screen.blit(level_text, ((self.position[0] * 40 + 5)*self.coefficient, (self.position[1] * 40 + 5)*self.coefficient))
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
+
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 4
+            self.range += 1
+            if self.speed <= 3:
+                self.speed += 0.05
 
     def upgrade(self):
         self.damage += 19  # Увеличиваем урон
@@ -217,6 +241,12 @@ class ExplosiveTower(Tower):
         level_text = self.font.render(f'{self.level}', True, (255, 255, 255))  # Белый цвет текста
         screen.blit(level_text, ((self.position[0] * 40 + 5)*self.coefficient, (self.position[1] * 40 + 5)*self.coefficient))
 
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 2
+            self.attack_speed += 0.05
+            self.range += 2
         # Отрисовка пуль
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
@@ -261,7 +291,11 @@ class OverclockTower(Tower):
         screen.blit(level_text, ((self.position[0] * 40 + 5)*self.coefficient, (self.position[1] * 40 + 5)*self.coefficient))
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
-
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 1
+            self.range += 1
 
     def upgrade(self):
         self.damage += 2  # Увеличиваем урон

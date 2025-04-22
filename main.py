@@ -38,6 +38,7 @@ class Game:
         self.green_papers = 0
         self.selected_tower_price = 24
         self.bossrush = bossrush
+        self.alpha_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
 
         if self.bossrush == True:
             pygame.mixer.music.load("music/4mat - Blank Page.mp3")
@@ -164,11 +165,8 @@ class Game:
                         self.enemy_spawn_interval = int(group_data[2])
                         self.enemies_spawned = 0  
                         self.group_num += 1  
-
-                    else:
-                        new_enemy = self.enemy_type(self.path, health, self.coefficient)
-                        new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
-                        self.enemies.append(new_enemy)
+                    else:                       
+                        self.enemies.append(self.enemy_type(self.path, health, self.coefficient))
                         self.enemies_spawned += 1
                 else:
                     if not self.enemies:
@@ -180,20 +178,16 @@ class Game:
                         for tower in self.towers:
                             if isinstance(tower, OverclockTower):
                                 tower.new_wave()
+                            if isinstance(tower, FarmTower):
+                                self.economy += tower.damage
             else:
                 self.enemy_spawn_interval = 500
-                if self.enemies_spawned < self.max_enemies_per_wave:
-                    enemy_type = enemy_types[self.wave % len([Basic, Fast, Strong])]
-                    new_enemy = enemy_type(self.path, health, self.coefficient)
-                    new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
-                    self.enemies.append(new_enemy)
+                if self.enemies_spawned < self.max_enemies_per_wave:                 
+                    self.enemies.append(enemy_types[self.wave % len([Basic, Fast, Strong])](self.path, health, self.coefficient))
                     self.enemies_spawned += 1 
         else:
             if self.enemies_spawned < 1:
-                enemy_type = Boss
-                new_enemy = enemy_type(self.path, health, self.coefficient)
-                new_enemy.position = (self.spawn_position[0] * self.cell_size, self.spawn_position[1] * self.cell_size)
-                self.enemies.append(new_enemy)
+                self.enemies.append(Boss(self.path, health, self.coefficient))
                 self.enemies_spawned += 1 
 
     def update(self):
@@ -214,7 +208,7 @@ class Game:
                 self.enemies.remove(enemy)
 
             if enemy.update(delta_time) and isinstance(enemy, Boss):
-                self.base_health -= 100  
+                self.base_health = 0
                 self.enemies.remove(enemy)                 
             if enemy.update(delta_time) and not isinstance(enemy, Boss):
                 self.base_health -= 10  
@@ -231,7 +225,6 @@ class Game:
             for tower in self.towers:
                 if isinstance(tower, OverclockTower):
                     tower.new_wave()
-            for tower in self.towers:
                 if isinstance(tower, FarmTower):
                     self.economy += tower.damage
 
@@ -293,6 +286,19 @@ class Game:
             self.draw_upgrade_button() 
             self.draw_demolish_button()
 
+            pygame.draw.circle(self.alpha_surface, (0, 255, 0,70), (self.selected_tower.position[0]*self.cell_size+20,self.selected_tower.position[1]*self.cell_size+20), self.selected_tower.range)  # Красный круг
+            self.screen.blit(self.alpha_surface, (0, 0))
+
+            health_bar_length = 250 * self.coefficient
+            health_ratio = self.selected_tower.xp / (200 + 200*self.selected_tower.xp_level)
+            health_bar_width = health_bar_length * health_ratio  # Длина полоски здоровья
+
+            pygame.draw.rect(self.screen, (85, 85, 85), (1500*self.coefficient - health_bar_length / 2,100*self.coefficient - 20, health_bar_length, 15* self.coefficient))  # Фоновая полоса здоровья
+            pygame.draw.rect(self.screen, (255, 255, 0), (1500*self.coefficient - health_bar_length / 2, 100*self.coefficient - 20, health_bar_width, 12* self.coefficient))  # Зеленая полоса здоровья
+
+            text_surface = tower_font.render(str(self.selected_tower.xp)+" / "+str(200 + 200*self.selected_tower.xp_level)+" Xp Level "+str(self.selected_tower.xp_level) , True, (255, 255, 255))
+            self.screen.blit(text_surface, (1400*self.coefficient, 60*self.coefficient))
+
     def draw(self):
         self.screen.fill(self.settings.bg_color) 
         self.draw_grid()  
@@ -305,6 +311,8 @@ class Game:
         for enemy in self.enemies:
             enemy.draw(self.screen,self.max_health)  
 
+        self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
+        self.screen.blit(self.alpha_surface, (0, 0))
         if self.base_health > 0:
             pygame.display.flip()
 
