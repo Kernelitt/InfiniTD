@@ -33,7 +33,7 @@ class Game:
         self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
         self.cell_size = round(40 *coefficient)
         self.base_health = 100
-        self.economy = 50 + self.settings.load_data()["StartMoney"]
+        self.economy = 50 + self.settings.load_data()["Upgrades"]["StartMoney"]
         self.load_map(current_level)
         self.green_papers = 0
         self.selected_tower_price = 24
@@ -66,6 +66,12 @@ class Game:
         tower = self.get_tower_at(grid_x, grid_y)
         if tower:
             self.selected_tower = tower
+            self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
+            self.screen.blit(self.alpha_surface, (0, 0))
+
+        else:
+            self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
+            self.screen.blit(self.alpha_surface, (0, 0))
 
     def get_tower_at(self, grid_x, grid_y):
         for tower in self.towers:
@@ -311,8 +317,7 @@ class Game:
         for enemy in self.enemies:
             enemy.draw(self.screen,self.max_health)  
 
-        self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
-        self.screen.blit(self.alpha_surface, (0, 0))
+
         if self.base_health > 0:
             pygame.display.flip()
 

@@ -12,6 +12,18 @@ class Settings:
         self.screen_width = 1800
         self.screen_height = 1000
         self.bg_color = (25, 25, 25)
+        self.save_base = {
+            "Money":int(0),
+            "Upgrades": {
+                "StartMoney": int(0)
+
+            },
+            "UpgradesCost": {
+                "StartMoney": int(150)
+
+            },
+            "Levels": {}
+        }
 
     def load_data(self):
         if os.path.exists("save_data.data"):
@@ -19,7 +31,7 @@ class Settings:
                 encrypted_data = f.read()
                 decrypted_data = self.cipher.decrypt(encrypted_data)
                 return json.loads(decrypted_data)  
-        return {"Money": 0, "StartMoney": int(0), "StartMoneyUpgradePrice": int(150),"Levels": {}}
+        return self.save_base
 
     def save_data(self, data):
         json_data = json.dumps(data).encode()

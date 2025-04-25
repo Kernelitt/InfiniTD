@@ -9,6 +9,8 @@ class Button:
         self.texts = texts
         self.action = action
         self.color = color
+        self.click_start = False
+
     def draw(self, window, font):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
         for i, (text, offset) in enumerate(self.texts):
@@ -17,9 +19,11 @@ class Button:
 
 
     def check_click(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.click_start = False
             if self.x < event.pos[0] < self.x + self.width and self.y < event.pos[1] < self.y + self.height:
                 self.action()
+
 
 
 import pygame
@@ -38,7 +42,7 @@ class RotatingSquare:
     def draw(self):
         pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.size, self.size))
 
-        self.angle += 0.2
+        self.angle += 0.05
         if self.angle > 360:
             self.angle = 0
         self.x = round(self.screen.get_width() // 2 - self.size // 2 + int(150 * math.cos(math.radians(self.angle))))
