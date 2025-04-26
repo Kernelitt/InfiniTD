@@ -1,7 +1,7 @@
 @echo off
 REM Компилируем файлы levelmaker.py и menu.py с помощью PyInstaller
-pyinstaller --onefile levelmaker.py
-pyinstaller --onefile menu.py
+pyinstaller --onefile --noconsole levelmaker.py
+pyinstaller --onefile --noconsole menu.py
 
 REM Копируем папки music и levels в папку dist
 xcopy /E /I music dist\music
