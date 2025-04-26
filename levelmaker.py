@@ -162,7 +162,7 @@ class LevelMaker:
             if (x, y) in self.platforms:  
                 self.platforms.remove((x, y))
             if (x, y) in self.paths:  
-                self.paths.remove((x, y))
+                self.paths.remove((x, y,order))
             self.canvas.itemconfig(self.grid[y][x], fill="white")  # Удаляем объект, устанавливаем белый цвет
 
 
