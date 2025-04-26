@@ -15,12 +15,16 @@ class Settings:
         self.save_base = {
             "Money":int(0),
             "Upgrades": {
-                "StartMoney": int(0)
-
+                "StartMoney": int(0),
+                "StartXPLevel": int(0)
             },
             "UpgradesCost": {
-                "StartMoney": int(150)
-
+                "StartMoney": int(150),
+                "StartXPLevel": int(1000),
+            },
+            "UpgradesPower": {
+                "StartMoney": int(10),
+                "StartXPLevel": int(1),
             },
             "Levels": {}
         }
@@ -34,7 +38,18 @@ class Settings:
         return self.save_base
 
     def save_data(self, data):
-        json_data = json.dumps(data).encode()
+        existing_data = self.load_data()
+
+        for key, value in data.items():
+            if isinstance(value, dict):
+                existing_data[key] = existing_data.get(key, {})
+                existing_data[key].update(value)
+            else:
+                existing_data[key] = value
+
+        print(existing_data)
+        # Сохраняем обновленный словарь в файл
+        json_data = json.dumps(existing_data).encode()
         encrypted_data = self.cipher.encrypt(json_data)
         with open("save_data.data", 'wb') as f:
             f.write(encrypted_data)

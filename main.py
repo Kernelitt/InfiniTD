@@ -148,7 +148,10 @@ class Game:
             self.towers.append(OverclockTower(position,self.coefficient))
         elif self.selected_tower_type == 'Farm':
             self.towers.append(FarmTower(position,self.coefficient))
-        self.grid[position[1]][position[0]] = 1  
+        self.grid[position[1]][position[0]] = 1 
+        for i in range(self.settings.load_data()["Upgrades"]["StartXPLevel"]):
+            self.towers[len(self.towers)-1].xp += 20000
+            self.towers[len(self.towers)-1].draw(self.screen)
 
     def upgrade_tower(self):
         if self.selected_tower and self.economy >= self.selected_tower.upgrade_price:

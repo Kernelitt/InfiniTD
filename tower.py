@@ -251,6 +251,8 @@ class ExplosiveTower(Tower):
         for bullet in self.bullets[:]:
             bullet.draw(screen)  # Отрисовываем пули
 
+
+
 class OverclockTower(Tower):
     def __init__(self, position,coefficient):
         super().__init__(position,coefficient)
@@ -341,6 +343,11 @@ class FarmTower(Tower):
         pygame.draw.circle(screen, (225, 225, 70), ((self.position[0] * 40 + 20)* self.coefficient, (self.position[1] * 40 + 20)* self.coefficient), self.size/2)
         level_text = self.font.render(f'{self.level}', True, (255, 255, 255))  # Белый цвет текста
         screen.blit(level_text, ((self.position[0] * 40 + 5)* self.coefficient, (self.position[1] * 40 + 5)* self.coefficient))
+
+        if self.xp >= 200 + 200*self.xp_level:
+            self.xp = 0
+            self.xp_level += 1
+            self.damage += 2
 
 class Bullet:
     def __init__(self, start_position, target_position, damage,speed,coefficient):

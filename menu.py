@@ -60,7 +60,11 @@ class Menu:
                     [("Upgrade Start Money", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
                     (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
                     lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
-  
+        self.upgrades_buttons.append(Button(600*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                    [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                    (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
+                    lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
+         
         for i in range(1, 11):
             self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
         self.level_buttons.append(Button(20 * self.coefficient, 800 * self.coefficient, 300 * self.coefficient, 50 * self.coefficient, [("Custom level", (10, 10))], lambda: self.set_custom_lvl(), (0, 200, 0)))
@@ -83,6 +87,11 @@ class Menu:
                                             (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), 
                                             (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
                                             lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
+        self.upgrades_buttons.append(Button(600 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                                            [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                                            (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), 
+                                            (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
+                                            lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
         print(1)
 
     def set_custom_lvl(self):
@@ -122,7 +131,7 @@ class Menu:
         upgrade_cost = self.settings.load_data()["UpgradesCost"].get(upgrade_str)
         if self.green_papers >= upgrade_cost:
             self.green_papers -= upgrade_cost
-            upgrade =  upgrade + 10
+            upgrade =  upgrade + self.settings.load_data()["UpgradesPower"].get(upgrade_str)
             upgrade_cost = round(upgrade_cost * 2.42)
             self.settings.save_data({"Money": self.green_papers, "Upgrades":{upgrade_str: upgrade}, "UpgradesCost":{upgrade_str: upgrade_cost}})
             self.update_upgrade_buttons()
