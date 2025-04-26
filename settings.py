@@ -46,9 +46,6 @@ class Settings:
                 existing_data[key].update(value)
             else:
                 existing_data[key] = value
-
-        print(existing_data)
-        # Сохраняем обновленный словарь в файл
         json_data = json.dumps(existing_data).encode()
         encrypted_data = self.cipher.encrypt(json_data)
         with open("save_data.data", 'wb') as f:

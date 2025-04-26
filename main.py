@@ -190,7 +190,8 @@ class Game:
                             if isinstance(tower, FarmTower):
                                 self.economy += tower.damage
             else:
-                self.enemy_spawn_interval = 500
+                intervals = [200,280,380,200,500,600,300,800]
+                self.enemy_spawn_interval = intervals[self.wave % len(intervals)] 
                 if self.enemies_spawned < self.max_enemies_per_wave:                 
                     self.enemies.append(enemy_types[self.wave % len([Basic, Fast, Strong])](self.path, health, self.coefficient))
                     self.enemies_spawned += 1 

@@ -76,10 +76,7 @@ class Menu:
 
 
     def update_upgrade_buttons(self):
-        # Очищаем текущие кнопки
         self.upgrades_buttons.clear()
-        
-        # Пересоздаем кнопки
         self.upgrades_buttons.append(Button(20 * self.coefficient, 900 * self.coefficient, 150 * self.coefficient, 50 * self.coefficient, 
                                             [("Back", (10, 10))], self.menu_upgrade, (200, 0, 0)))
         self.upgrades_buttons.append(Button(50 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
@@ -92,7 +89,7 @@ class Menu:
                                             (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), 
                                             (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
                                             lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-        print(1)
+
 
     def set_custom_lvl(self):
         self.custom_level = filedialog.askopenfilename()
@@ -142,6 +139,8 @@ class Menu:
             self.bossrush = False
         else:
             self.bossrush = True
+        self.level_buttons.pop()
+        self.level_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 350*self.coefficient, 50*self.coefficient, [("Boss Rush "+str(self.bossrush), (10, 10))], lambda:self.change_bossrush(), (0, 200, 0)))
 
 
     def main_menu(self):
