@@ -32,7 +32,7 @@ class Game:
         self.grid_width = self.grid_height = 24
         self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
         self.cell_size = round(40 *coefficient)
-        self.base_health = 100
+        self.base_health = 20 + self.settings.load_data()["Upgrades"]["StartBaseHP"]
         self.economy = 50 + self.settings.load_data()["Upgrades"]["StartMoney"]
         self.load_map(current_level)
         self.green_papers = 0
@@ -51,7 +51,6 @@ class Game:
             map_data = json.load(file)
         self.path = [(p[0], p[1]) for p in map_data['paths']]
         self.platforms = [(p[0], p[1]) for p in map_data['platforms']]
-        self.base_health = map_data['base_health']
         self.difficulty_multiplier = map_data['difficulty_multiplier']
         try:
             self.custom_waves = map_data['waves']
@@ -221,7 +220,7 @@ class Game:
                 self.base_health = 0
                 self.enemies.remove(enemy)                 
             if enemy.update(delta_time) and not isinstance(enemy, Boss):
-                self.base_health -= 10  
+                self.base_health -= 1
                 self.enemies.remove(enemy) 
             
         if not self.enemies and self.enemies_spawned > 0:
@@ -231,7 +230,10 @@ class Game:
             self.wave += 1 
             self.max_enemies_per_wave += 0.3  
             self.enemies_spawned = 0  
-            self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier
+            if self.bossrush:
+                self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier * 3
+            else:
+                self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier
             for tower in self.towers:
                 if isinstance(tower, OverclockTower):
                     tower.new_wave()
@@ -400,7 +402,7 @@ class Game:
         settings = Settings() 
         from menu import Menu
         while True:
-            pygame.time.Clock().tick(120)  # Ограничить FPS до 60 кадров в секунду
+            pygame.time.Clock().tick(120)
             self.check_events()
             self.update()
             self.draw()

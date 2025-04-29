@@ -16,15 +16,18 @@ class Settings:
             "Money":int(0),
             "Upgrades": {
                 "StartMoney": int(0),
-                "StartXPLevel": int(0)
+                "StartXPLevel": int(0),
+                "StartBaseHP": int(0),
             },
             "UpgradesCost": {
                 "StartMoney": int(150),
                 "StartXPLevel": int(1000),
+                "StartBaseHP": int(300),
             },
             "UpgradesPower": {
                 "StartMoney": int(10),
                 "StartXPLevel": int(1),
+                "StartBaseHP": int(3),
             },
             "Levels": {}
         }

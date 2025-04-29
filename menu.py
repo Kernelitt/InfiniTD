@@ -64,7 +64,11 @@ class Menu:
                     [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
                     (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
                     lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-         
+        self.upgrades_buttons.append(Button(1150*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                    [("Upgrade Start Base HP", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                    (str(self.settings.load_data()["UpgradesCost"]["StartBaseHP"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartBaseHP"]), (250, 55))], 
+                    lambda: self.upgrade_anything("StartBaseHP"), (0, 200, 0)))
+                 
         for i in range(1, 11):
             self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
         self.level_buttons.append(Button(20 * self.coefficient, 800 * self.coefficient, 300 * self.coefficient, 50 * self.coefficient, [("Custom level", (10, 10))], lambda: self.set_custom_lvl(), (0, 200, 0)))
@@ -89,7 +93,11 @@ class Menu:
                                             (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), 
                                             (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
                                             lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-
+        self.upgrades_buttons.append(Button(1150*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                                            [("Upgrade Start Base HP", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                                            (str(self.settings.load_data()["UpgradesCost"]["StartBaseHP"]), (10, 55)),
+                                            (str(self.settings.load_data()["Upgrades"]["StartBaseHP"]), (250, 55))], 
+                                            lambda: self.upgrade_anything("StartBaseHP"), (0, 200, 0)))
 
     def set_custom_lvl(self):
         self.custom_level = filedialog.askopenfilename()
