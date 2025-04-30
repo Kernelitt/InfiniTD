@@ -128,7 +128,7 @@ class Game:
                     tower = FarmTower((grid_x, grid_y),self.coefficient)  
                 if self.economy >= tower.price: 
                     self.build_tower((grid_x, grid_y)) 
-                    self.economy -= tower.price 
+                    self.economy -= tower.price - self.settings.load_data()["Upgrades"]["DiscountOnConstruction"]
             else:
                 self.handle_tower_click(grid_x, grid_y)
         else:
