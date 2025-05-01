@@ -16,21 +16,18 @@ class Settings:
             "Money":int(0),
             "Upgrades": {
                 "StartMoney": int(0),
-                "ImprovingEarnings": int(0),
                 "StartXPLevel": int(0),
-                "DiscountOnConstruction": int(0),
+                "StartBaseHP": int(0),
             },
             "UpgradesCost": {
                 "StartMoney": int(150),
                 "StartXPLevel": int(1000),
-                "ImprovingEarnings": int(350),
-                "DiscountOnConstruction": int(1500),
+                "StartBaseHP": int(300),
             },
             "UpgradesPower": {
                 "StartMoney": int(10),
                 "StartXPLevel": int(1),
-                "ImprovingEarnings": int(1),
-                "DiscountOnConstruction": int(1),
+                "StartBaseHP": int(3),
             },
             "Levels": {}
         }
@@ -60,7 +57,7 @@ class Settings:
     def save_game_data(self,money, level, wave):
         data = self.load_data()
     # Обновляем количество монет
-        data["Money"] += money * (0.1 * data["Upgrades"]["ImprovingEarnings"] + 1)  # Прибавляем полученные монеты
+        data["Money"] += money  # Прибавляем полученные монеты
         if "Levels" not in data:
             data["Levels"] = {}
         if str(level) not in data["Levels"] or data["Levels"][str(level)] < wave:

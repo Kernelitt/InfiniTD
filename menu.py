@@ -28,8 +28,6 @@ class Menu:
         self.menu_active = True
         self.level_select = False
         self.upgrades_menu = False
-        self.help_en = False
-        self.help_ru = False
         self.current_level = 1
 
         self.settings = Settings()
@@ -51,8 +49,6 @@ class Menu:
         self.level_buttons = []
         self.menu_buttons = []
         self.upgrades_buttons = []
-        self.helpen_buttons = []
-        self.helpru_buttons = []
 
         self.bossrush = False
 
@@ -60,30 +56,18 @@ class Menu:
         self.menu_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Upgrades", (10, 6))], lambda: self.menu_upgrade(), (0, 200, 0)))
 
         self.upgrades_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.menu_upgrade, (200, 0, 0)))
-        self.helpen_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.helps_en, (200, 0, 0)))
-        self.helpru_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Назад", (10, 10))], self.helps_ru, (200, 0, 0)))
-        self.upgrades_buttons.append(Button(1550*self.coefficient, 150*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("?    eng", (10, 10))], lambda:self.helps_en(), (200, 0, 0)))
-        self.upgrades_buttons.append(Button(1550*self.coefficient, 210*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("?    рус", (10, 10))], lambda:self.helps_ru(), (200, 0, 0)))
         self.upgrades_buttons.append(Button(50*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Upgrade Start Money", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(410 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(770 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Improving Earnings", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["ImprovingEarnings"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["ImprovingEarnings"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("ImprovingEarnings"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(1130 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Discount On Construction", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["DiscountOnConstruction"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["DiscountOnConstruction"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("DiscountOnConstruction"), (0, 200, 0)))
+                    [("Upgrade Start Money", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                    (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
+                    lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
+        self.upgrades_buttons.append(Button(600*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                    [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                    (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
+                    lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
+        self.upgrades_buttons.append(Button(1150*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                    [("Upgrade Start Base HP", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                    (str(self.settings.load_data()["UpgradesCost"]["StartBaseHP"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartBaseHP"]), (250, 55))], 
+                    lambda: self.upgrade_anything("StartBaseHP"), (0, 200, 0)))
                  
         for i in range(1, 11):
             self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
@@ -104,37 +88,16 @@ class Menu:
                                             (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), 
                                             (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
                                             lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(410 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+        self.upgrades_buttons.append(Button(600 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
                                             [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
                                             (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), 
                                             (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
                                             lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(770 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Improving Earnings", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["ImprovingEarnings"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["ImprovingEarnings"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("ImprovingEarnings"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(1130 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                                            [("Discount On Construction", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                                            (str(self.settings.load_data()["UpgradesCost"]["DiscountOnConstruction"]), (10, 55)), 
-                                            (str(self.settings.load_data()["Upgrades"]["DiscountOnConstruction"]), (250, 55))], 
-                                            lambda: self.upgrade_anything("DiscountOnConstruction"), (0, 200, 0)))
-        
-    def helps_ru(self):
-        if self.help_ru == False:
-            self.help_ru = True
-            self.upgrades_menu = False 
-        else:
-            self.upgrades_menu = True
-            self.help_ru = False
-
-    def helps_en(self):
-        if self.help_en == False:
-            self.help_en = True
-            self.upgrades_menu = False 
-        else:
-            self.upgrades_menu = True
-            self.help_en = False
+        self.upgrades_buttons.append(Button(1150*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
+                                            [("Upgrade Start Base HP", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
+                                            (str(self.settings.load_data()["UpgradesCost"]["StartBaseHP"]), (10, 55)),
+                                            (str(self.settings.load_data()["Upgrades"]["StartBaseHP"]), (250, 55))], 
+                                            lambda: self.upgrade_anything("StartBaseHP"), (0, 200, 0)))
 
     def set_custom_lvl(self):
         self.custom_level = filedialog.askopenfilename()
@@ -209,7 +172,8 @@ class Menu:
                 for button in self.menu_buttons:
                     button.draw(self.screen, self.font)
 
-                self.screen.blit(self.font.render("Rare Ore "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
+                self.screen.blit(self.font.render("Money "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
+
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -224,7 +188,7 @@ class Menu:
 
 
                 title_surface = self.font.render("Improvements", True, self.BLACK)
-                self.screen.blit(self.font.render("Rare Ore "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
+                self.screen.blit(self.font.render("Money "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
 
                 self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
 
@@ -237,97 +201,6 @@ class Menu:
                         pygame.quit()
                         sys.exit()
                     for button in self.upgrades_buttons:
-                        button.check_click(event)
-
-                pygame.display.flip()
-
-            while self.help_en:
-                self.screen.fill(self.WHITE)
-
-                title_surface = self.font.render("Description of Upgrades", True, self.BLACK)
-                self.screen.blit(self.font.render("Rare Ore "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
-
-                self.screen.blit(self.font.render("Improving Earnings", True, (0, 0, 255)), (1000 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("This improvement", True, (0, 0, 255)), (1000 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("adds 10%", True, (0, 0, 255)), (1000 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("per level", True, (0, 0, 255)), (1000 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("to the final Rare Ore ", True, (0, 0, 255)), (1000 * self.coefficient, 350 * self.coefficient))
-                self.screen.blit(self.font.render("amount at the end of the game.", True, (0, 0, 255)), (1000 * self.coefficient, 400 * self.coefficient))
-
-                self.screen.blit(self.font.render("Start XP Level", True, (255, 0, 0)), (490 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("This upgrade adds lvl", True, (255, 0, 0)), (490 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("to the towers that", True, (255, 0, 0)), (490 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("you have set up in", True, (255, 0, 0)), (490 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("one level upgrade.", True, (255, 0, 0)), (490 * self.coefficient, 350 * self.coefficient))
-
-                self.screen.blit(self.font.render("Start Money", True, (0, 255, 0)), (50 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("This upgrade", True, (0, 255, 0)), (50 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("adds money at", True, (0, 255, 0)), (50 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("the start of the game at", True, (0, 255, 0)), (50 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("ten coins per level.", True, (0, 255, 0)), (50 * self.coefficient, 350 * self.coefficient))
-                
-                self.screen.blit(self.font.render("Discount On Construction", True, (0, 0, 255)), (50 * self.coefficient, 500 * self.coefficient))
-                self.screen.blit(self.font.render("Gives you a discount", True, (0, 0, 255)), (50 * self.coefficient, 550 * self.coefficient))
-                self.screen.blit(self.font.render("on installing a tower", True, (0, 0, 255)), (50 * self.coefficient, 600 * self.coefficient))
-                self.screen.blit(self.font.render("of one coin per level.", True, (0, 0, 255)), (50 * self.coefficient, 650 * self.coefficient))
-
-                self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
-
-
-                for button in self.helpen_buttons:
-                    button.draw(self.screen, self.font_small)
-
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    for button in self.helpen_buttons:
-                        button.check_click(event)
-
-                pygame.display.flip()
-
-            while self.help_ru:
-                self.screen.fill(self.WHITE)
-
-                title_surface = self.font.render("Описание Апгрейдов", True, self.BLACK)
-                self.screen.blit(self.font.render("Rare Ore "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
-
-                self.screen.blit(self.font.render("Improving Earnings", True, (0, 0, 255)), (1000 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("Это улучшение", True, (0, 0, 255)), (1000 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("Прибавляет 10% ", True, (0, 0, 255)), (1000 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("За уровень ", True, (0, 0, 255)), (1000 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("К конечной сумме  ", True, (0, 0, 255)), (1000 * self.coefficient, 350 * self.coefficient))
-                self.screen.blit(self.font.render("Rare Ore в конце игры ", True, (0, 0, 255)), (1000 * self.coefficient, 400 * self.coefficient))
-
-                self.screen.blit(self.font.render("Start XP Level", True, (255, 0, 0)), (490 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("Это улучшение добавляет", True, (255, 0, 0)), (490 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("лвл башням, ", True, (255, 0, 0)), (490 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("которые вы поставили ", True, (255, 0, 0)), (490 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("за одну прокачку", True, (255, 0, 0)), (490 * self.coefficient, 350 * self.coefficient))
-                self.screen.blit(self.font.render("по одному уровню", True, (255, 0, 0)), (490 * self.coefficient, 400 * self.coefficient))
-
-                self.screen.blit(self.font.render("Start Money", True, (0, 255, 0)), (50 * self.coefficient, 150 * self.coefficient))
-                self.screen.blit(self.font.render("Это улучшение", True, (0, 255, 0)), (50 * self.coefficient, 200 * self.coefficient))
-                self.screen.blit(self.font.render("добавляет деньги при ", True, (0, 255, 0)), (50 * self.coefficient, 250 * self.coefficient))
-                self.screen.blit(self.font.render("старте игры по десять ", True, (0, 255, 0)), (50 * self.coefficient, 300 * self.coefficient))
-                self.screen.blit(self.font.render("монет за уровень", True, (0, 255, 0)), (50 * self.coefficient, 350 * self.coefficient))
-                
-                self.screen.blit(self.font.render("Discount On Construction", True, (0, 0, 255)), (50 * self.coefficient, 500 * self.coefficient))
-                self.screen.blit(self.font.render("Даёт скидку на ", True, (0, 0, 255)), (50 * self.coefficient, 550 * self.coefficient))
-                self.screen.blit(self.font.render("установку башни в ", True, (0, 0, 255)), (50 * self.coefficient, 600 * self.coefficient))
-                self.screen.blit(self.font.render("одну монету за уровень", True, (0, 0, 255)), (50 * self.coefficient, 650 * self.coefficient))
-                
-                self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
-
-
-                for button in self.helpru_buttons:
-                    button.draw(self.screen, self.font_small)
-
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    for button in self.helpru_buttons:
                         button.check_click(event)
 
                 pygame.display.flip()
