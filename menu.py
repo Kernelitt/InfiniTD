@@ -4,7 +4,7 @@ import sys
 from cryptography.fernet import Fernet
 from tkinter import filedialog
 from settings import Settings
-from pygame_stuff import Button, RotatingSquare
+from pygame_stuff import Button, RotatingSquare 
 
 class Menu:
     def __init__(self):

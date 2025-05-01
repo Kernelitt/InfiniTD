@@ -1,6 +1,6 @@
 import json
 import os
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet 
 
 class Settings:
 
