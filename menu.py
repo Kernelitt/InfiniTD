@@ -56,18 +56,7 @@ class Menu:
         self.menu_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Upgrades", (10, 6))], lambda: self.menu_upgrade(), (0, 200, 0)))
 
         self.upgrades_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.menu_upgrade, (200, 0, 0)))
-        self.upgrades_buttons.append(Button(50*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                    [("Upgrade Start Money", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                    (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartMoney"]), (250, 55))], 
-                    lambda: self.upgrade_anything("StartMoney"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(600*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                    [("Upgrade Start XP Level", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                    (str(self.settings.load_data()["UpgradesCost"]["StartXPLevel"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartXPLevel"]), (250, 55))], 
-                    lambda: self.upgrade_anything("StartXPLevel"), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(1150*self.coefficient, 150*self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
-                    [("Upgrade Start Base HP", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
-                    (str(self.settings.load_data()["UpgradesCost"]["StartBaseHP"]), (10, 55)), (str(self.settings.load_data()["Upgrades"]["StartBaseHP"]), (250, 55))], 
-                    lambda: self.upgrade_anything("StartBaseHP"), (0, 200, 0)))
+        self.update_upgrade_buttons()
                  
         for i in range(1, 11):
             self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
