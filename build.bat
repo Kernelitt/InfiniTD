@@ -6,6 +6,7 @@ pyinstaller --onefile --noconsole menu.py
 REM Копируем папки music и levels в папку dist
 xcopy /E /I music dist\music
 xcopy /E /I levels dist\levels
+xcopy /E /I mods dist\mods
 
 REM Копируем файл config.ini в папку dist
 copy config.ini dist\config.ini
