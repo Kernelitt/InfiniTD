@@ -1,5 +1,5 @@
 import json
-import os
+import os,sys
 from cryptography.fernet import Fernet 
 import importlib
 
@@ -111,14 +111,19 @@ class Settings:
         if not os.path.exists(plugin_folder):
             print(f"Plugin folder '{plugin_folder}' does not exist.")
             return
+        # Добавляем путь к папке mods в список sys.path
+        sys.path.insert(0, os.path.abspath(plugin_folder))
         for filename in os.listdir(plugin_folder):
             if filename.endswith('.py'):
                 module_name = filename[:-3]  # Убираем .py
-                module = importlib.import_module(f"{plugin_folder}.{module_name}")
-                self.plugins.append(module)
-                self.total_plugins.append(module)
-                print(f"Loaded mod: {module_name}")
-        print("Loaded in total ",self.plugins)
+                try:
+                    module = importlib.import_module(module_name)
+                    self.plugins.append(module)
+                    self.total_plugins.append(module)
+                    print(f"Loaded mod: {module_name}")
+                except ImportError as e:
+                    print(f"Error loading mod: {module_name} - {e}")
+        print("Loaded in total ", self.plugins)
 
     def toggle_plugin(self,i):
         plugin_name = self.total_plugins[i]
