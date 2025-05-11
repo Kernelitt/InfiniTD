@@ -20,7 +20,8 @@ class Game:
         self.towers = []
         self.selected_tower = None
         self.enemy_spawn_time = 0
-        self.enemy_spawn_interval = 500
+        self.enemy_spawn_interval = 100
+        self.enemy_spawn_intervals = [200,280,380,200,500,600,300,800]
         self.last_update_time = pygame.time.get_ticks()
         self.wave = 0
         self.max_enemies_per_wave = 5
@@ -45,6 +46,7 @@ class Game:
             pygame.mixer.music.play(-1)
 
 
+        self.run_plugins()
 
     def load_map(self, file_path):
         with open(file_path, 'r') as file:
@@ -59,7 +61,18 @@ class Game:
         self.spawn_position = self.path[0]  
 
 
-
+    def run_plugins(self):
+        for plugin in self.settings.plugins:
+            if hasattr(plugin, 'run'):
+                plugin.run(self)  
+    def update_plugins(self):
+        for plugin in self.settings.plugins:
+            if hasattr(plugin, 'update'):
+                plugin.update(self)  
+    def wave_cleared_plugins(self):
+        for plugin in self.settings.plugins:
+            if hasattr(plugin, 'wave_cleared'):
+                plugin.wave_cleared(self)  
 
     def handle_tower_click(self, grid_x, grid_y):
         tower = self.get_tower_at(grid_x, grid_y)
@@ -189,8 +202,7 @@ class Game:
                             if isinstance(tower, FarmTower):
                                 self.economy += tower.damage
             else:
-                intervals = [200,280,380,200,500,600,300,800]
-                self.enemy_spawn_interval = intervals[self.wave % len(intervals)] 
+                self.enemy_spawn_interval = self.enemy_spawn_intervals[self.wave % len(self.enemy_spawn_intervals)] 
                 if self.enemies_spawned < self.max_enemies_per_wave:                 
                     self.enemies.append(enemy_types[self.wave % len([Basic, Fast, Strong])](self.path, health, self.coefficient))
                     self.enemies_spawned += 1 
@@ -239,6 +251,7 @@ class Game:
                     tower.new_wave()
                 if isinstance(tower, FarmTower):
                     self.economy += tower.damage
+            self.wave_cleared_plugins()
 
         for tower in self.towers:
             tower.shoot(self.enemies)  
@@ -406,6 +419,7 @@ class Game:
             self.check_events()
             self.update()
             self.draw()
+            self.update_plugins()
             if self.base_health <= 0:
                 break
         self.draw_defeat_screen()

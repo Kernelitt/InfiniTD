@@ -1,7 +1,7 @@
 import pygame
 
 class Button:
-    def __init__(self, x, y, width, height, texts, action,color):
+    def __init__(self, x, y, width, height, texts, action,color,pre_action=None):
         self.x = x
         self.y = y
         self.width = width
@@ -10,6 +10,7 @@ class Button:
         self.action = action
         self.color = color
         self.click_start = False
+        self.pre_action = pre_action
 
     def draw(self, window, font):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
@@ -17,12 +18,17 @@ class Button:
             text_surface = font.render(text, True, (255, 255, 255))
             window.blit(text_surface, (self.x + offset[0], self.y + offset[1]))
 
+        pos = pygame.mouse.get_pos()
+        if self.x < pos[0] < self.x + self.width and self.y < pos[1] < self.y + self.height and self.pre_action != None:
+            self.pre_action()
 
     def check_click(self, event):
         if event.type == pygame.MOUSEBUTTONUP:
             self.click_start = False
             if self.x < event.pos[0] < self.x + self.width and self.y < event.pos[1] < self.y + self.height:
                 self.action()
+
+
 
 
 

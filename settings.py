@@ -1,13 +1,15 @@
 import json
 import os
 from cryptography.fernet import Fernet 
+import importlib
 
 class Settings:
 
     key = b'aVV1rKC-_l1OxB2ym3AwR-FsHDW79OJnPr-Ppcr9W9w='  # Замените на ваш сгенерированный ключ
-    cipher = Fernet(key)    
-
-
+    cipher = Fernet(key)  
+    total_plugins = []  
+    plugins = []
+    disabled_plugins = []           # Initially disabled plugins
     def __init__(self):
         self.screen_width = 1800
         self.screen_height = 1000
@@ -104,3 +106,29 @@ class Settings:
 
         return width, height
 
+    def load_plugins(self, plugin_folder='mods'):
+        self.total_plugins = []
+        if not os.path.exists(plugin_folder):
+            print(f"Plugin folder '{plugin_folder}' does not exist.")
+            return
+        for filename in os.listdir(plugin_folder):
+            if filename.endswith('.py'):
+                module_name = filename[:-3]  # Убираем .py
+                module = importlib.import_module(f"{plugin_folder}.{module_name}")
+                self.plugins.append(module)
+                self.total_plugins.append(module)
+                print(f"Loaded mod: {module_name}")
+        print("Loaded in total ",self.plugins)
+
+    def toggle_plugin(self,i):
+        plugin_name = self.total_plugins[i]
+        if plugin_name in self.plugins:
+            self.plugins.remove(plugin_name)
+            self.disabled_plugins.append(plugin_name)
+            print(f"Disabled plugin: {plugin_name}")
+        elif plugin_name in self.disabled_plugins:
+            self.disabled_plugins.remove(plugin_name)
+            self.plugins.append(plugin_name)
+            print(f"Enabled plugin: {plugin_name}")
+        else:
+            pass
