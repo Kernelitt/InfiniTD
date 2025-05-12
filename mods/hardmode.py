@@ -2,14 +2,29 @@
 
 def get_info(self):
     return ("Hard Mode", 
-            "Decrease Intervals")
+            "Increase Difficulty")
 
 def run(game):
-    game.enemy_spawn_intervals = [100]
+    game.economy -= 20
 
 
 def update(game):
-    pass
+    current_enemy = game.wave % 3
+    
+    for enemy in game.enemies:
+        if current_enemy == 0:
+            if enemy.health <= game.max_health:       #Basic
+                enemy.health += game.max_health / 500
+        if current_enemy == 1:
+            if enemy.health <= game.max_health / 1.8: #Fast
+                enemy.health += game.max_health / 500
+        if current_enemy == 2:
+            if enemy.health <= game.max_health * 1.5: #Strong
+                enemy.health += game.max_health / 500
 
 def wave_cleared(game):
-    print(f"Mod: Wave Cleared")
+    if game.wave % 5 == 0:
+        if game.economy > 100:
+            game.economy -= 100
+        else:
+            game.economy = 0
