@@ -118,7 +118,7 @@ class Settings:
                 module_name = filename[:-3]  # Убираем .py
                 try:
                     module = importlib.import_module(module_name)
-                    self.plugins.append(module)
+                    self.disabled_plugins.append(module)
                     self.total_plugins.append(module)
                     print(f"Loaded mod: {module_name}")
                 except ImportError as e:

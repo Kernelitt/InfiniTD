@@ -170,8 +170,10 @@ class Game:
             self.economy -= self.selected_tower.upgrade_price 
             self.selected_tower.upgrade()  
 
+
+
     def spawn_enemy(self):
-        enemy_types = [Basic, Fast, Strong,Boss]  
+        self.enemy_types = [Basic, Fast, Strong,Boss]  
         self.max_health = (40 + 5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier
         health = (40 + 5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier
         if self.bossrush == False:
@@ -181,7 +183,7 @@ class Game:
                     group_data = wave_data[self.group_num]
 
                     if self.enemies_spawned == self.enemy_count:
-                        self.enemy_type = enemy_types[int(group_data[0]) - 1]
+                        self.enemy_type = self.enemy_types[int(group_data[0]) - 1]
                         self.enemy_count = int(group_data[1])
                         self.enemy_spawn_interval = int(group_data[2])
                         self.enemies_spawned = 0  
@@ -204,7 +206,7 @@ class Game:
             else:
                 self.enemy_spawn_interval = self.enemy_spawn_intervals[self.wave % len(self.enemy_spawn_intervals)] 
                 if self.enemies_spawned < self.max_enemies_per_wave:                 
-                    self.enemies.append(enemy_types[self.wave % len([Basic, Fast, Strong])](self.path, health, self.coefficient))
+                    self.enemies.append(self.enemy_types[self.wave % len([Basic, Fast, Strong])](self.path, health, self.coefficient))
                     self.enemies_spawned += 1 
         else:
             if self.enemies_spawned < 1:

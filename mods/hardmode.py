@@ -23,8 +23,4 @@ def update(game):
                 enemy.health += game.max_health / 500
 
 def wave_cleared(game):
-    if game.wave % 5 == 0:
-        if game.economy > 100:
-            game.economy -= 100
-        else:
-            game.economy = 0
+    pass

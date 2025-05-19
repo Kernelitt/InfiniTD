@@ -16,10 +16,10 @@ class Tower:
         self.bullets = []  # Список пуль
         self.speed = 6
         self.price = 24
-        self.font = pygame.font.Font(None, 24)  # Инициализация шрифта
+        self.font = pygame.font.Font(None, round(24* self.coefficient))  # Инициализация шрифта
         self.xp_level = 0
         self.xp = 0
-
+        self.cell_size = round(40 *coefficient)
 
 
     def shoot(self, enemies):

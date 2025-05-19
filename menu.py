@@ -25,10 +25,6 @@ class Menu:
 
         self.wave = 0
         self.curl = 0
-        self.menu_active = True
-        self.level_select = False
-        self.upgrades_menu = False
-        self.mod_menu = False
         self.current_level = 1
 
         self.settings = Settings()
@@ -40,6 +36,8 @@ class Menu:
 
         pygame.mixer.music.load("music\Seablue - Aurora Dawn.mp3")
         pygame.mixer.music.play(-1)
+
+        self.menu_scene = "main_menu"
 
         self.squares = []
         self.squares.append(RotatingSquare(self.screen, 0, 0, 80, (0, 0, 255), 0))
@@ -55,10 +53,10 @@ class Menu:
         self.current_plugin = 0
         self.bossrush = False
 
-        self.menu_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Play", (10, 10))], lambda:self.level_menu(), (0, 200, 0)))
-        self.menu_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Upgrades", (10, 6))], lambda: self.menu_upgrade(), (0, 200, 0)))
-        self.menu_buttons.append(Button(130*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Mods", (10, 6))], lambda: self.menu_modMenu(), (0, 200, 0)))
-        self.upgrades_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.menu_upgrade, (200, 0, 0)))
+        self.menu_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Play", (10, 10))], lambda:self.menu_scene_change("level_select"), (0, 200, 0)))
+        self.menu_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Upgrades", (10, 6))], lambda: self.menu_scene_change("upgrades"), (0, 200, 0)))
+        self.menu_buttons.append(Button(130*self.coefficient, 860*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Mods", (10, 6))], lambda: self.menu_scene_change("mod_menu"), (0, 200, 0)))
+        self.upgrades_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))],lambda:self.menu_scene_change("main_menu"), (200, 0, 0)))
         self.update_upgrade_buttons()
                  
         for i in range(1, 11):
@@ -68,19 +66,19 @@ class Menu:
         if self.settings.total_plugins:
             for i in range(0, len(self.settings.total_plugins)):
                 self.mod_menu_buttons.append(Button(20 * self.coefficient, 50 + i * 50 * self.coefficient - 30, 370 * self.coefficient, 45 * self.coefficient, [(self.settings.total_plugins[i].get_info(self)[0], (10, 10))], lambda i=i:self.settings.toggle_plugin(i), (0, 200, 0),lambda i=i:self.draw_mod_info(i)))
-        self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.level_menu, (0, 200, 0)))
+        self.level_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], lambda:self.menu_scene_change("main_menu"), (0, 200, 0)))
 
         self.level_buttons.append(Button(1300*self.coefficient, 800*self.coefficient, 300*self.coefficient, 50*self.coefficient, [("Start Level", (10, 10))], self.start_game, (0, 200, 0)))
         self.level_buttons.append(Button(1300*self.coefficient, 860*self.coefficient, 350*self.coefficient, 50*self.coefficient, [("Boss Rush "+str(self.bossrush), (10, 10))], lambda:self.change_bossrush(), (0, 200, 0)))
 
-        self.mod_menu_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], self.menu_modMenu, (200, 0, 0)))
+        self.mod_menu_buttons.append(Button(20*self.coefficient, 900*self.coefficient, 150*self.coefficient, 50*self.coefficient, [("Back", (10, 10))], lambda:self.menu_scene_change("main_menu"), (200, 0, 0)))
 
 
 
     def update_upgrade_buttons(self):
         self.upgrades_buttons.clear()
         self.upgrades_buttons.append(Button(20 * self.coefficient, 900 * self.coefficient, 150 * self.coefficient, 50 * self.coefficient, 
-                                            [("Back", (10, 10))], self.menu_upgrade, (200, 0, 0)))
+                                            [("Back", (10, 10))],lambda: self.menu_scene_change("main_menu"), (200, 0, 0)))
         self.upgrades_buttons.append(Button(50 * self.coefficient, 150 * self.coefficient, 350 * self.coefficient, 90 * self.coefficient, 
                                             [("Upgrade Start Money", (2, 4)), ("in total:", (250, 30)), ("price:", (10, 30)), 
                                             (str(self.settings.load_data()["UpgradesCost"]["StartMoney"]), (10, 55)), 
@@ -106,29 +104,9 @@ class Menu:
         if self.custom_level != None: 
             self.custom_level_var = True
 
-    def menu_modMenu(self):
-        if self.mod_menu == False:
-            self.menu_active = False
-            self.mod_menu = True
-        else:
-            self.menu_active = True
-            self.mod_menu = False
+    def menu_scene_change(self,scene):
+        self.menu_scene = scene
 
-    def level_menu(self):
-        if self.level_select == False:
-            self.menu_active = False
-            self.level_select = True
-        else:
-            self.menu_active = True
-            self.level_select = False
-
-    def menu_upgrade(self):
-        if self.upgrades_menu == False:
-            self.menu_active = False
-            self.upgrades_menu = True 
-        else:
-            self.menu_active = True
-            self.upgrades_menu = False
 
     def get_waves_for_level(self,level):
         data = self.settings.load_data()  
@@ -166,7 +144,7 @@ class Menu:
         wave = self.get_waves_for_level(self.current_level)
         self.green_papers = self.settings.load_data()["Money"]
         while True:
-            while self.menu_active:
+            if self.menu_scene == "main_menu":
                 self.screen.fill(self.WHITE)
 
                 title_surface = self.font.render("Main Menu", True, self.BLACK)
@@ -188,9 +166,8 @@ class Menu:
 
                 pygame.display.flip()
 
-            while self.upgrades_menu:
+            if self.menu_scene == "upgrades":
                 self.screen.fill(self.WHITE)
-
 
                 title_surface = self.font.render("Improvements", True, self.BLACK)
                 self.screen.blit(self.font.render("Money "+str(self.green_papers), True, (255, 255, 255)), (1500*self.coefficient, 50*self.coefficient))
@@ -210,7 +187,7 @@ class Menu:
 
                 pygame.display.flip()
 
-            while self.level_select:
+            if self.menu_scene == "level_select":
                 self.screen.fill(self.WHITE)
 
 
@@ -225,8 +202,8 @@ class Menu:
                     text = self.font.render("Level "+filename, True, (255, 255, 255))
                 else:
                     text = self.font.render("Level "+str(self.current_level), True, (255, 255, 255))          
-                text_rect = text.get_rect(topleft=(1300*self.coefficient, 600*self.coefficient))
-                self.screen.blit(text, text_rect)
+
+                self.screen.blit(text, text.get_rect(topleft=(1300*self.coefficient, 600*self.coefficient)))
 
                 for button in self.level_buttons:
                     button.draw(self.screen, self.font)
@@ -240,16 +217,20 @@ class Menu:
 
                 pygame.display.flip()
           
-            while self.mod_menu:
+            while self.menu_scene == "mod_menu":
                 self.screen.fill(self.WHITE)
+
                 title_surface = self.font.render("Mod Menu", True, self.BLACK)
                 self.screen.blit(title_surface, (self.resolution[0] // 2 - title_surface.get_width() // 2, 50*self.coefficient))
+
                 if self.settings.total_plugins[self.current_plugin] in self.settings.plugins:
                     self.screen.blit(self.font.render("Mod On", True, (255, 255, 255)), (500*self.coefficient, 630*self.coefficient))
                 else:
                     self.screen.blit(self.font.render("Mod Off", True, (255, 255, 255)), (500*self.coefficient, 630*self.coefficient))
+
                 self.screen.blit(self.font.render("Mod Name:", True, (255, 255, 255)), (500*self.coefficient, 680*self.coefficient))
-                self.screen.blit(self.font.render(self.settings.total_plugins[self.current_plugin].get_info(self)[0], True, (255, 255, 255)), (500*self.coefficient, 710*self.coefficient))              
+                self.screen.blit(self.font.render(self.settings.total_plugins[self.current_plugin].get_info(self)[0], True, (255, 255, 255)), (500*self.coefficient, 710*self.coefficient)) 
+                             
                 self.screen.blit(self.font.render("Mod Description:", True, (255, 255, 255)), (500*self.coefficient, 770*self.coefficient))
                 self.screen.blit(self.font.render(self.settings.total_plugins[self.current_plugin].get_info(self)[1], True, (255, 255, 255)), (500*self.coefficient, 800*self.coefficient))
 
@@ -268,8 +249,6 @@ class Menu:
     def start_game(self):
         from main import Game
 
-        self.menu_active = False  # Скрываем меню
-        self.level_select = False  # Скрываем меню
         if self.custom_level_var == False:
             game = Game(self.settings, self.screen, "levels\lvl"+str(self.current_level)+".json",self.coefficient,self.bossrush)  # Создаем экземпляр игры с текущим уровнем и экраном
         else:
