@@ -20,6 +20,12 @@ class Menu:
         self.GREEN = (0, 205, 0)
         self.RED = (255, 0, 0)
 
+        self.BRONZE = (191, 122, 33)
+        self.SILVER = (172, 187, 189)
+        self.GOLD = (232, 207, 21)
+        self.DIAMOND = (23, 251, 255)
+        
+
         self.font = pygame.font.Font(None, int(54 * self.coefficient))
         self.font_small = pygame.font.Font(None, int(36 * self.coefficient))
 
@@ -60,7 +66,24 @@ class Menu:
         self.update_upgrade_buttons()
                  
         for i in range(1, 11):
-            self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))
+            try:
+                waves = self.settings.load_data()["Levels"].get("levels\lvl"+str(i)+".json", 0)
+
+            except:
+                waves = 0
+            if  waves >= 100:
+                    self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), self.DIAMOND))
+            elif 80 <= waves <= 99:
+                    self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), self.GOLD))
+            elif 60 <= waves <= 79:
+                    self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), self.SILVER))
+            elif 40 <= waves <= 59:
+                    self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), self.BRONZE))
+            else:
+                    self.level_buttons.append(Button(20 * self.coefficient, 0 + i * 50 * self.coefficient - 30, 170 * self.coefficient, 45 * self.coefficient, [("Level " + str(i), (10, 10))], lambda i=i: self.set_current_level(i), (0, 200, 0)))       
+
+
+
         self.level_buttons.append(Button(20 * self.coefficient, 800 * self.coefficient, 300 * self.coefficient, 50 * self.coefficient, [("Custom level", (10, 10))], lambda: self.set_custom_lvl(), (0, 200, 0)))
  
         if self.settings.total_plugins:
