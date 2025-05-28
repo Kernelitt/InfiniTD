@@ -1,12 +1,12 @@
 import pygame
-
+from enemy import Boss
 class Tower:
     def __init__(self, position,coefficient):
         self.coefficient = coefficient
         self.position = position
         self.size = 30 * self.coefficient # Размер квадрата
         self.damage = 20  # Начальный урон
-        self.range = 200 * self.coefficient  # Начальный радиус
+        self.range = 200
         self.attack_speed = 2.0  # Скорость атаки
         self.level = 1  # Уровень башни
         self.upgrade_price = 18  # Стоимость улучшения
@@ -20,6 +20,7 @@ class Tower:
         self.xp_level = 0
         self.xp = 0
         self.cell_size = round(40 *coefficient)
+        self.damage_dealed = 0
 
 
     def shoot(self, enemies):
@@ -50,6 +51,7 @@ class Tower:
                 if enemy.is_alive() and self.check_collision(bullet, enemy):
                     enemy.take_damage(bullet.damage)  # Наносим урон врагу
                     self.xp += bullet.damage
+                    self.damage_dealed += bullet.damage
                     self.bullets.remove(bullet)  # Удаляем пулю
                     break  # Выходим из цикла после столкновения
 
@@ -57,7 +59,11 @@ class Tower:
         # Создаем прямоугольник для пули
         bullet_rect = pygame.Rect(bullet.position[0] - 5, bullet.position[1] - 5, 8, 8)  # Пуля размером 10x10
     # Создаем прямоугольник для врага
-        enemy_rect = pygame.Rect(enemy.position[0], enemy.position[1], 15, 15)  # Враг размером 40x40
+        if isinstance(enemy, Boss):
+            enemy_rect = pygame.Rect(enemy.position[0]-10, enemy.position[1]-10, 20, 20)  # Враг размером 40x40
+        else:
+            enemy_rect = pygame.Rect(enemy.position[0]-5, enemy.position[1]-5, 10,10)
+
         return bullet_rect.colliderect(enemy_rect)
 
     def draw(self, screen):
@@ -83,7 +89,7 @@ class Tower:
 
     # Рассчитываем расстояние между башней и врагом
         distance = ((tower_pixel_x - enemy.position[0]) ** 2 + (tower_pixel_y - enemy.position[1]) ** 2) ** 0.5
-        return distance <= self.range
+        return distance <= self.range * self.coefficient
 
 
     def upgrade(self):
@@ -100,7 +106,7 @@ class FastTower(Tower):
     def __init__(self, position,coefficient):
         super().__init__(position,coefficient)
         self.speed = 2
-        self.range = 80  # Меньший радиус
+        self.range = 80  
         self.attack_speed = 14.0  # Большая скорострельность
         self.damage = 3  # Можно уменьшить урон, если необходимо
         self.upgrade_price = 25  # Стоимость улучшения для быстрой башни
@@ -139,7 +145,7 @@ class RocketTower(Tower):
     def __init__(self, position,coefficient):
         super().__init__(position,coefficient)
         self.speed = 1
-        self.range = 300  # Меньший радиус
+        self.range = 300  
         self.attack_speed = 1.0  # Большая скорострельность
         self.damage = 20  # Можно уменьшить урон, если необходимо
         self.upgrade_price = 35  # Стоимость улучшения для быстрой башни
@@ -192,12 +198,13 @@ class ExplosiveTower(Tower):
     def __init__(self, position,coefficient):
         super().__init__(position,coefficient)
         self.damage = 16  # Урон взрывного снаряда
-        self.range = 200  # Радиус стрельбы
+        self.range = 200  
         self.attack_speed = 1.0  # Скорость атаки
         self.explosion_radius = 40  # Радиус взрыва
         self.color = (205, 0, 70)  # Цвет башни (красный)
         self.upgrade_price = 40  # Стоимость улучшения для быстрой башни
         self.price = 36
+
 
     def shoot(self, enemies):
         for enemy in enemies:
@@ -231,8 +238,10 @@ class ExplosiveTower(Tower):
             # Проверка столкновения с врагами
             for enemy in enemies:
                 if enemy.is_alive() and self.check_collision(bullet, enemy):
-                    bullet.explode(enemies)  # Вызываем взрыв
+                    exploded = bullet.explode(enemies)  # Вызываем взрыв
                     self.bullets.remove(bullet)  # Удаляем пулю
+                    self.xp += self.damage
+                    self.damage_dealed += self.damage * exploded
                     break  # Выходим из цикла после столкновения
 
     def draw(self, screen):
@@ -257,7 +266,7 @@ class OverclockTower(Tower):
     def __init__(self, position,coefficient):
         super().__init__(position,coefficient)
         self.speed = 3
-        self.range = 180  # Меньший радиус
+        self.range = 180  
         self.attack_speed = 1.0
         self.base_attack_speed = 2.0  # Базовая скорострельность
         self.last_shot_time = 0  # Время последнего выстрела
@@ -416,9 +425,11 @@ class ExplosiveBullet(Bullet):
             self.alive = False
 
     def explode(self, enemies):
-        # Наносим урон всем врагам в радиусе взрыва
+        total_enemies = 0
         for enemy in enemies:
             distance = ((self.position[0] - enemy.position[0]) ** 2 + (self.position[1] - enemy.position[1]) ** 2) ** 0.5
             if distance <= self.explosion_radius:
                 enemy.take_damage(self.damage)  # Наносим урон врагу
+                total_enemies += 1
+        return total_enemies
 

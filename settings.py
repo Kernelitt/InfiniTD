@@ -67,7 +67,7 @@ class Settings:
    
         self.save_data(data)
 
-    def read_screen_resolution(config_file='config.ini'):
+    def read_config(config_file='config.ini'):
         try:
             with open(config_file, 'r') as file:
                 content = file.readlines()
@@ -77,6 +77,8 @@ class Settings:
 
         width = None
         height = None
+        fullscreen = False
+        volume = 0
 
         for line in content:
             line = line.strip()
@@ -93,6 +95,17 @@ class Settings:
                 elif key == 'height':
                     height = value
 
+            if line.startswith('[') and line.endswith(']'):
+                section = line[1:-1]
+                if section == 'Music':
+                    continue
+            elif '=' in line:
+                key, value = line.split('=', 1)
+                key = key.strip()
+                value = value.strip()
+                if key == 'volume':
+                    volume = value
+
         if width is None or height is None:
             print("Error: Section 'Screen' or keys 'width' and 'height' not found in the configuration file.")
             return None
@@ -100,11 +113,12 @@ class Settings:
         try:
             width = int(width)
             height = int(height)
+            volume = float(volume)
         except ValueError:
-            print("Error: Values 'width' and 'height' must be integers.")
+            print("Error: Values 'width' and 'height' must be integers. \n Value 'volume' must be float.")
             return None
 
-        return width, height
+        return width, height,fullscreen,volume
 
     def load_plugins(self, plugin_folder='mods'):
         self.total_plugins = []
@@ -123,7 +137,7 @@ class Settings:
                     print(f"Loaded mod: {module_name}")
                 except ImportError as e:
                     print(f"Error loading mod: {module_name} - {e}")
-        print("Loaded in total ", self.plugins)
+        print("Loaded in total ", self.disabled_plugins)
 
     def toggle_plugin(self,i):
         plugin_name = self.total_plugins[i]

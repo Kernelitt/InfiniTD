@@ -11,7 +11,7 @@ import json
 
 
 class Game:
-    def __init__(self, settings, screen,current_level,coefficient,bossrush):
+    def __init__(self, settings, screen,current_level,coefficient,bossrush,music_volume):
         self.current_level = current_level
         self.settings = settings
         self.screen = screen
@@ -44,6 +44,7 @@ class Game:
         if self.bossrush == True:
             pygame.mixer.music.load("music/4mat - Blank Page.mp3")
             pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(music_volume)
 
 
         self.run_plugins()
@@ -299,6 +300,7 @@ class Game:
             tower_font = pygame.font.SysFont('Arial', int(20*self.coefficient))
             tower_info_x = 1500 *self.coefficient
             tower_info_items = [
+            (f"Damage Dealed: {self.selected_tower.damage_dealed}", (1200*self.coefficient, 20*self.coefficient)),
             (f"Damage: {self.selected_tower.damage}", (tower_info_x, 150*self.coefficient)),
             (f"Range: {self.selected_tower.range}", (tower_info_x,175*self.coefficient)),
             (f"Attack Speed: {self.selected_tower.attack_speed:.2f}", (tower_info_x,200*self.coefficient)),
@@ -313,15 +315,15 @@ class Game:
             self.draw_upgrade_button() 
             self.draw_demolish_button()
 
-            pygame.draw.circle(self.alpha_surface, (0, 255, 0,70), (self.selected_tower.position[0]*self.cell_size+20,self.selected_tower.position[1]*self.cell_size+20), self.selected_tower.range)  # Красный круг
+            pygame.draw.circle(self.alpha_surface, (0, 255, 0,70), (self.selected_tower.position[0]*self.cell_size+(20*self.coefficient),self.selected_tower.position[1]*self.cell_size+(20*self.coefficient)), self.selected_tower.range * self.coefficient)  
             self.screen.blit(self.alpha_surface, (0, 0))
 
             health_bar_length = 250 * self.coefficient
             health_ratio = self.selected_tower.xp / (200 + 200*self.selected_tower.xp_level)
-            health_bar_width = health_bar_length * health_ratio  # Длина полоски здоровья
+            health_bar_width = health_bar_length * health_ratio 
 
-            pygame.draw.rect(self.screen, (85, 85, 85), (1500*self.coefficient - health_bar_length / 2,100*self.coefficient - 20, health_bar_length, 15* self.coefficient))  # Фоновая полоса здоровья
-            pygame.draw.rect(self.screen, (255, 255, 0), (1500*self.coefficient - health_bar_length / 2, 100*self.coefficient - 20, health_bar_width, 12* self.coefficient))  # Зеленая полоса здоровья
+            pygame.draw.rect(self.screen, (85, 85, 85), (1500*self.coefficient - health_bar_length / 2,100*self.coefficient - 20, health_bar_length, 15* self.coefficient))  
+            pygame.draw.rect(self.screen, (255, 255, 0), (1500*self.coefficient - health_bar_length / 2, 100*self.coefficient - 20, health_bar_width, 12* self.coefficient)) 
 
             text_surface = tower_font.render(str(self.selected_tower.xp)+" / "+str(200 + 200*self.selected_tower.xp_level)+" Xp Level "+str(self.selected_tower.xp_level) , True, (255, 255, 255))
             self.screen.blit(text_surface, (1400*self.coefficient, 60*self.coefficient))
@@ -415,7 +417,7 @@ class Game:
 
     def run(self):
         settings = Settings() 
-        from menu import Menu
+
         while True:
             pygame.time.Clock().tick(120)
             self.check_events()
@@ -427,7 +429,6 @@ class Game:
         self.draw_defeat_screen()
         settings.save_game_data(self.green_papers, self.current_level, self.wave)
         print("game over")
-        menu = Menu()
-        menu.main_menu()
+
         return
 
