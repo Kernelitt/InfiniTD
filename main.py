@@ -41,6 +41,9 @@ class Game:
         self.bossrush = bossrush
         self.alpha_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
 
+        self.clock = pygame.time.Clock()
+
+
         if self.bossrush == True:
             pygame.mixer.music.load("music/4mat - Blank Page.mp3")
             pygame.mixer.music.play(-1)
@@ -268,10 +271,9 @@ class Game:
                 pygame.draw.rect(self.screen, color, (col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size), 1) 
 
 
-    def draw_platforms(self):
+    def draw_cells(self):
         for (col, row) in self.platforms:
             pygame.draw.rect(self.screen, (0, 165, 0), (col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size))  
-    def draw_path(self):
         for (x, y) in self.path:
             pygame.draw.rect(self.screen, (105, 0, 0), (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size))  
 
@@ -295,46 +297,73 @@ class Game:
             text_rect = rendered_text.get_rect(topleft=position)
             self.screen.blit(rendered_text, text_rect)
 
-    # Отображение характеристик выбранной башни
+        self.fps = self.clock.get_fps()
+        self.fps_text = f"FPS: {round(self.fps,1)}"
+        text_surface = font.render(self.fps_text, True, (255, 255, 255))
+        self.screen.blit(text_surface, (1650*self.coefficient,970*self.coefficient))
+
+# Отображение характеристик выбранной башни
         if self.selected_tower:
-            tower_font = pygame.font.SysFont('Arial', int(20*self.coefficient))
-            tower_info_x = 1500 *self.coefficient
+            tower_font = pygame.font.SysFont('Arial', int(20 * self.coefficient))
+            tower_info_x = 1500 * self.coefficient
+
+            # Подготовка текстов
             tower_info_items = [
-            (f"Damage Dealed: {self.selected_tower.damage_dealed}", (1200*self.coefficient, 20*self.coefficient)),
-            (f"Damage: {self.selected_tower.damage}", (tower_info_x, 150*self.coefficient)),
-            (f"Range: {self.selected_tower.range}", (tower_info_x,175*self.coefficient)),
-            (f"Attack Speed: {self.selected_tower.attack_speed:.2f}", (tower_info_x,200*self.coefficient)),
-            (f"Upgrade Cost: {self.selected_tower.upgrade_price:.2f}", (tower_info_x,225*self.coefficient)),
-            (f"Level: {self.selected_tower.level}", (tower_info_x,250*self.coefficient))
+                (f"Damage Dealed: {self.selected_tower.damage_dealed}", (1200 * self.coefficient, 20 * self.coefficient)),
+                (f"Damage: {self.selected_tower.damage}", (tower_info_x, 150 * self.coefficient)),
+                (f"Range: {self.selected_tower.range}", (tower_info_x, 175 * self.coefficient)),
+                (f"Attack Speed: {self.selected_tower.attack_speed:.2f}", (tower_info_x, 200 * self.coefficient)),
+                (f"Upgrade Cost: {self.selected_tower.upgrade_price:.2f}", (tower_info_x, 225 * self.coefficient)),
+                (f"Level: {self.selected_tower.level}", (tower_info_x, 250 * self.coefficient))
             ]
 
-            for text, position in tower_info_items:
-                rendered_text = tower_font.render(text, True, (255, 255, 255))
+            # Отрисовка текста
+            rendered_texts = [tower_font.render(text, True, (255, 255, 255)) for text, _ in tower_info_items]
+            for rendered_text, (_, position) in zip(rendered_texts, tower_info_items):
                 text_rect = rendered_text.get_rect(topleft=position)
                 self.screen.blit(rendered_text, text_rect)
-            self.draw_upgrade_button() 
-            self.draw_demolish_button()
 
-            pygame.draw.circle(self.alpha_surface, (0, 255, 0,70), (self.selected_tower.position[0]*self.cell_size+(20*self.coefficient),self.selected_tower.position[1]*self.cell_size+(20*self.coefficient)), self.selected_tower.range * self.coefficient)  
+            button_rect = pygame.Rect(1650*self.coefficient, 50*self.coefficient, 140*self.coefficient, 40*self.coefficient)
+            pygame.draw.rect(self.screen, (0, 255, 0), button_rect) 
+            text = tower_font.render("Upgrade Tower", True, (255, 255, 255)) 
+            self.screen.blit(text, text.get_rect(center=button_rect.center))
+
+            button_rect = pygame.Rect(1650*self.coefficient, 100*self.coefficient, 140*self.coefficient, 40*self.coefficient)
+            pygame.draw.rect(self.screen, (255, 0, 0), button_rect) 
+            text = tower_font.render("Demolish Tower", True, (255, 255, 255))
+            self.screen.blit(text, text.get_rect(center=button_rect.center))
+
+            # Отрисовка круга
+            circle_position = (self.selected_tower.position[0] * self.cell_size + (20 * self.coefficient),
+                            self.selected_tower.position[1] * self.cell_size + (20 * self.coefficient))
+            pygame.draw.circle(self.alpha_surface, (0, 255, 0, 70), circle_position, self.selected_tower.range * self.coefficient)  
             self.screen.blit(self.alpha_surface, (0, 0))
 
+            # Отрисовка полосы здоровья
             health_bar_length = 250 * self.coefficient
-            health_ratio = self.selected_tower.xp / (200 + 200*self.selected_tower.xp_level)
+            health_ratio = self.selected_tower.xp / (200 + 200 * self.selected_tower.xp_level)
             health_bar_width = health_bar_length * health_ratio 
 
-            pygame.draw.rect(self.screen, (85, 85, 85), (1500*self.coefficient - health_bar_length / 2,100*self.coefficient - 20, health_bar_length, 15* self.coefficient))  
-            pygame.draw.rect(self.screen, (255, 255, 0), (1500*self.coefficient - health_bar_length / 2, 100*self.coefficient - 20, health_bar_width, 12* self.coefficient)) 
+            pygame.draw.rect(self.screen, (85, 85, 85), (1500 * self.coefficient - health_bar_length / 2, 100 * self.coefficient - 20, health_bar_length, 15 * self.coefficient))  
+            pygame.draw.rect(self.screen, (255, 255, 0), (1500 * self.coefficient - health_bar_length / 2, 100 * self.coefficient - 20, health_bar_width, 12 * self.coefficient)) 
 
-            text_surface = tower_font.render(str(self.selected_tower.xp)+" / "+str(200 + 200*self.selected_tower.xp_level)+" Xp Level "+str(self.selected_tower.xp_level) , True, (255, 255, 255))
-            self.screen.blit(text_surface, (1400*self.coefficient, 60*self.coefficient))
+            # Отрисовка текста опыта
+            xp_text = f"{self.selected_tower.xp} / {200 + 200 * self.selected_tower.xp_level} Xp Level {self.selected_tower.xp_level}"
+            text_surface = tower_font.render(xp_text, True, (255, 255, 255))
+            self.screen.blit(text_surface, (1400 * self.coefficient, 50 * self.coefficient))
+
 
     def draw(self):
         self.screen.fill(self.settings.bg_color) 
         self.draw_grid()  
-        self.draw_platforms()
-        self.draw_path()  
+        self.draw_cells()
         self.draw_info()
-        self.draw_exit_button()
+        
+        button_rect = pygame.Rect(0, 960*self.coefficient, 140*self.coefficient, 40*self.coefficient)
+        pygame.draw.rect(self.screen, (185, 0, 110), button_rect)
+        font = pygame.font.SysFont('Arial', int(20*self.coefficient))
+        text = font.render("Surrender", True, (255, 255, 255))
+        self.screen.blit(text, text.get_rect(center=button_rect.center))
         for tower in self.towers:
             tower.draw(self.screen) 
         for enemy in self.enemies:
@@ -379,13 +408,6 @@ class Game:
                     waiting = False
 
 
-    def draw_upgrade_button(self):
-        button_rect = pygame.Rect(1650*self.coefficient, 50*self.coefficient, 140*self.coefficient, 40*self.coefficient)
-        pygame.draw.rect(self.screen, (0, 255, 0), button_rect) 
-        font = pygame.font.SysFont('Arial', int(20*self.coefficient))
-        text = font.render("Upgrade Tower", True, (255, 255, 255))
-        text_rect = text.get_rect(center=button_rect.center)
-        self.screen.blit(text, text_rect)
 
     def demolish_tower(self):
         if self.selected_tower:
@@ -394,32 +416,13 @@ class Game:
             self.grid[self.selected_tower.position[1]][self.selected_tower.position[0]] = 0 
             self.selected_tower = None 
 
-    def draw_demolish_button(self):
-        button_rect = pygame.Rect(1650*self.coefficient, 100*self.coefficient, 140*self.coefficient, 40*self.coefficient)
-        pygame.draw.rect(self.screen, (255, 0, 0), button_rect) 
-        font = pygame.font.SysFont('Arial', int(20*self.coefficient))
-        text = font.render("Demolish Tower", True, (255, 255, 255))
-        text_rect = text.get_rect(center=button_rect.center)
-        self.screen.blit(text, text_rect)
-
-    def draw_exit_button(self):
-        button_rect = pygame.Rect(0, 960*self.coefficient, 140*self.coefficient, 40*self.coefficient)
-        pygame.draw.rect(self.screen, (185, 0, 110), button_rect)
-        font = pygame.font.SysFont('Arial', int(20*self.coefficient))
-        text = font.render("Surrender", True, (255, 255, 255))
-        text_rect = text.get_rect(center=button_rect.center)
-        self.screen.blit(text, text_rect)
-
-
-
-
 
 
     def run(self):
         settings = Settings() 
 
         while True:
-            pygame.time.Clock().tick(120)
+            self.clock.tick(120)
             self.check_events()
             self.update()
             self.draw()
