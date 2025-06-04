@@ -12,37 +12,47 @@ import json
 
 class Game:
     def __init__(self, settings, screen,current_level,coefficient,bossrush,music_volume):
+        # Basic
         self.current_level = current_level
         self.settings = settings
         self.screen = screen
         self.coefficient = coefficient
+        # Grid
+        self.grid_width = self.grid_height = 24
+        self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
+        self.cell_size = round(40 *coefficient)
+
+        self.load_map(current_level)
+
+        self.bossrush = bossrush
+        self.alpha_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
+        self.last_update_time = pygame.time.get_ticks()  
+        self.clock = pygame.time.Clock()
+        # Wave
+        self.wave = 0
+        self.wave_started = False
+        self.auto_start = False
+
+        # Enemies
         self.enemies = []
-        self.towers = []
-        self.selected_tower = None
         self.enemy_spawn_time = 0
         self.enemy_spawn_interval = 100
         self.enemy_spawn_intervals = [200,280,380,200,500,600,300,800]
-        self.last_update_time = pygame.time.get_ticks()
-        self.wave = 0
         self.max_enemies_per_wave = 5
         self.enemies_spawned = 0
         self.enemy_count = 0
         self.group_num = 0
         self.enemy_type = 'Basic'
+        # Towers
+        self.towers = []
+        self.selected_tower = None
         self.selected_tower_type = 'Basic'
-        self.grid_width = self.grid_height = 24
-        self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
-        self.cell_size = round(40 *coefficient)
+        self.selected_tower_price = 24
+        # Upgrades
         self.base_health = 20 + self.settings.load_data()["Upgrades"]["StartBaseHP"]
         self.economy = 50 + self.settings.load_data()["Upgrades"]["StartMoney"]
-        self.load_map(current_level)
+
         self.green_papers = 0
-        self.selected_tower_price = 24
-        self.bossrush = bossrush
-        self.alpha_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
-
-        self.clock = pygame.time.Clock()
-
 
         if self.bossrush == True:
             pygame.mixer.music.load("music/4mat - Blank Page.mp3")
@@ -68,11 +78,13 @@ class Game:
     def run_plugins(self):
         for plugin in self.settings.plugins:
             if hasattr(plugin, 'run'):
-                plugin.run(self)  
+                plugin.run(self) 
+
     def update_plugins(self):
         for plugin in self.settings.plugins:
             if hasattr(plugin, 'update'):
                 plugin.update(self)  
+
     def wave_cleared_plugins(self):
         for plugin in self.settings.plugins:
             if hasattr(plugin, 'wave_cleared'):
@@ -82,12 +94,9 @@ class Game:
         tower = self.get_tower_at(grid_x, grid_y)
         if tower:
             self.selected_tower = tower
-            self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
-            self.screen.blit(self.alpha_surface, (0, 0))
+        self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
+        self.screen.blit(self.alpha_surface, (0, 0))
 
-        else:
-            self.alpha_surface.fill((0, 0, 0, 0))  # Fill with transparent black
-            self.screen.blit(self.alpha_surface, (0, 0))
 
     def get_tower_at(self, grid_x, grid_y):
         for tower in self.towers:
@@ -107,15 +116,22 @@ class Game:
                     grid_y = mouse_y // self.cell_size
                     if (1200*self.coefficient >= mouse_x):
                         self.handle_click(grid_x, grid_y)
-                    if (1650*self.coefficient <= mouse_x <= 1790*self.coefficient and
-                        50*self.coefficient <= mouse_y <= 90*self.coefficient):
-                        self.upgrade_tower()  
-                    if (1650*self.coefficient <= mouse_x <= 1790*self.coefficient and
-                    100*self.coefficient <= mouse_y <= 140*self.coefficient):
-                        self.demolish_tower() 
-                    if (0 <= mouse_x <= 140*self.coefficient and
-                    960*self.coefficient <= mouse_y <= 1000*self.coefficient):
+
+                    if (1650*self.coefficient <= mouse_x <= 1790*self.coefficient and 50*self.coefficient <= mouse_y <= 90*self.coefficient):
+                        if self.selected_tower and self.economy >= self.selected_tower.upgrade_price: # Upgrade Tower
+                            self.economy -= self.selected_tower.upgrade_price 
+                            self.selected_tower.upgrade()  
+
+                    if (1650*self.coefficient <= mouse_x <= 1790*self.coefficient and 100*self.coefficient <= mouse_y <= 140*self.coefficient):
+                        if self.selected_tower: # Destroy Tower
+                            self.economy += self.selected_tower.price // 2
+                            self.towers.remove(self.selected_tower) 
+                            self.grid[self.selected_tower.position[1]][self.selected_tower.position[0]] = 0 
+                            self.selected_tower = None 
+
+                    if (0 <= mouse_x <= 140*self.coefficient and 960*self.coefficient <= mouse_y <= 1000*self.coefficient):
                         self.base_health = 0     
+
             self.tower_types = {
             pygame.K_1: ('Basic', Tower((0, 0),self.coefficient).price),
             pygame.K_2: ('Fast', FastTower((0, 0),self.coefficient).price),
@@ -127,54 +143,45 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key in self.tower_types:
                     self.selected_tower_type, self.selected_tower_price = self.tower_types[event.key]
+                if event.key == pygame.K_SPACE:
+                    if self.wave % 20 == 0 and self.wave_started == False:
+                        self.enemies.append(Boss(self.path,(5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier,self.coefficient))
+                    self.wave_started = True
+                if event.key == pygame.K_r:
+                    self.auto_start = True
+
 
     def handle_click(self, grid_x, grid_y):
         if (grid_x, grid_y) in self.platforms: 
             if self.grid[grid_y][grid_x] == 0: 
+                tower_class = None
+                
                 if self.selected_tower_type == 'Basic':
-                    tower = Tower((grid_x, grid_y),self.coefficient) 
+                    tower_class = Tower
                 elif self.selected_tower_type == 'Fast':
-                    tower = FastTower((grid_x, grid_y),self.coefficient)  
+                    tower_class = FastTower
                 elif self.selected_tower_type == 'Rocket':
-                    tower = RocketTower((grid_x, grid_y),self.coefficient) 
+                    tower_class = RocketTower
                 elif self.selected_tower_type == 'Explosive':
-                    tower = ExplosiveTower((grid_x, grid_y),self.coefficient)  
+                    tower_class = ExplosiveTower
                 elif self.selected_tower_type == 'Overclock':
-                    tower = OverclockTower((grid_x, grid_y),self.coefficient)  
+                    tower_class = OverclockTower
                 elif self.selected_tower_type == 'Farm':
-                    tower = FarmTower((grid_x, grid_y),self.coefficient)  
-                if self.economy >= tower.price: 
-                    self.build_tower((grid_x, grid_y)) 
-                    self.economy -= tower.price 
+                    tower_class = FarmTower
+                
+                if tower_class is not None:
+                    tower = tower_class((grid_x, grid_y), self.coefficient)
+                    if self.economy >= tower.price: 
+                        self.towers.append(tower)  # Добавляем башню в список
+                        self.grid[grid_y][grid_x] = 1  # Обновляем сетку
+                        self.economy -= tower.price  # Уменьшаем экономику
+                        for i in range(self.settings.load_data()["Upgrades"]["StartXPLevel"]):
+                            self.towers[len(self.towers)-1].xp += 999990
+                            self.towers[len(self.towers)-1].draw(self.screen)
             else:
                 self.handle_tower_click(grid_x, grid_y)
         else:
             self.selected_tower = None
-
-    def build_tower(self, position):
-        if self.selected_tower_type == 'Basic':
-            self.towers.append(Tower(position,self.coefficient))  
-        elif self.selected_tower_type == 'Fast':
-            self.towers.append(FastTower(position,self.coefficient)) 
-        elif self.selected_tower_type == 'Rocket':
-            self.towers.append(RocketTower(position,self.coefficient)) 
-        elif self.selected_tower_type == 'Explosive':
-            self.towers.append(ExplosiveTower(position,self.coefficient)) 
-        elif self.selected_tower_type == 'Overclock':
-            self.towers.append(OverclockTower(position,self.coefficient))
-        elif self.selected_tower_type == 'Farm':
-            self.towers.append(FarmTower(position,self.coefficient))
-        self.grid[position[1]][position[0]] = 1 
-        for i in range(self.settings.load_data()["Upgrades"]["StartXPLevel"]):
-            self.towers[len(self.towers)-1].xp += 20000
-            self.towers[len(self.towers)-1].draw(self.screen)
-
-    def upgrade_tower(self):
-        if self.selected_tower and self.economy >= self.selected_tower.upgrade_price:
-            self.economy -= self.selected_tower.upgrade_price 
-            self.selected_tower.upgrade()  
-
-
 
     def spawn_enemy(self):
         self.enemy_types = [Basic, Fast, Strong,Boss]  
@@ -219,9 +226,9 @@ class Game:
 
     def update(self):
         current_time = pygame.time.get_ticks()
-        delta_time = (current_time - self.last_update_time) / 1000.0 
+        delta_time = (current_time - self.last_update_time) / 1000.0
 
-        if current_time - self.enemy_spawn_time > self.enemy_spawn_interval:
+        if current_time - self.enemy_spawn_time > self.enemy_spawn_interval and self.wave_started:
             self.spawn_enemy()
             self.enemy_spawn_time = current_time
 
@@ -241,17 +248,18 @@ class Game:
                 self.base_health -= 1
                 self.enemies.remove(enemy) 
             
-        if not self.enemies and self.enemies_spawned > 0:
-            if (self.wave + 1) % 20 == 0:
-                self.enemies.append(Boss(self.path,(5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier,self.coefficient))
+        if not self.enemies and self.enemies_spawned >= self.max_enemies_per_wave: #Wave Cleared
+
             self.economy += 10 + 2 * self.wave
             self.wave += 1 
             self.max_enemies_per_wave += 0.3  
             self.enemies_spawned = 0  
+
             if self.bossrush:
                 self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier * 3
             else:
                 self.green_papers = self.green_papers + self.wave * self.difficulty_multiplier
+
             for tower in self.towers:
                 if isinstance(tower, OverclockTower):
                     tower.new_wave()
@@ -259,6 +267,11 @@ class Game:
                     self.economy += tower.damage
             self.wave_cleared_plugins()
 
+            if self.auto_start == False:
+                self.wave_started = False
+            else:
+                if self.wave % 20 == 0:
+                    self.enemies.append(Boss(self.path,(5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier,self.coefficient))
         for tower in self.towers:
             tower.shoot(self.enemies)  
             tower.update_bullets(self.enemies)
@@ -269,14 +282,10 @@ class Game:
             for col in range(self.grid_width):
                 color = (200, 200, 200)  
                 pygame.draw.rect(self.screen, color, (col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size), 1) 
-
-
-    def draw_cells(self):
         for (col, row) in self.platforms:
             pygame.draw.rect(self.screen, (0, 165, 0), (col * self.cell_size, row * self.cell_size, self.cell_size, self.cell_size))  
         for (x, y) in self.path:
             pygame.draw.rect(self.screen, (105, 0, 0), (x * self.cell_size, y * self.cell_size, self.cell_size, self.cell_size))  
-
 
     def draw_info(self):
         font = pygame.font.SysFont('Arial', int(24*self.coefficient))  
@@ -302,7 +311,9 @@ class Game:
         text_surface = font.render(self.fps_text, True, (255, 255, 255))
         self.screen.blit(text_surface, (1650*self.coefficient,970*self.coefficient))
 
-# Отображение характеристик выбранной башни
+        if self.wave_started == False:           
+            self.screen.blit(font.render(f"Press 'Space' to start a new wave", True, (255, 255, 255)), (1200*self.coefficient,670*self.coefficient))
+
         if self.selected_tower:
             tower_font = pygame.font.SysFont('Arial', int(20 * self.coefficient))
             tower_info_x = 1500 * self.coefficient
@@ -333,21 +344,18 @@ class Game:
             text = tower_font.render("Demolish Tower", True, (255, 255, 255))
             self.screen.blit(text, text.get_rect(center=button_rect.center))
 
-            # Отрисовка круга
             circle_position = (self.selected_tower.position[0] * self.cell_size + (20 * self.coefficient),
                             self.selected_tower.position[1] * self.cell_size + (20 * self.coefficient))
             pygame.draw.circle(self.alpha_surface, (0, 255, 0, 70), circle_position, self.selected_tower.range * self.coefficient)  
             self.screen.blit(self.alpha_surface, (0, 0))
 
-            # Отрисовка полосы здоровья
-            health_bar_length = 250 * self.coefficient
-            health_ratio = self.selected_tower.xp / (200 + 200 * self.selected_tower.xp_level)
-            health_bar_width = health_bar_length * health_ratio 
+            xp_bar_length = 250 * self.coefficient
+            xp_ratio = self.selected_tower.xp / (200 + 200 * self.selected_tower.xp_level)
+            xp_bar_width = xp_bar_length * xp_ratio 
 
-            pygame.draw.rect(self.screen, (85, 85, 85), (1500 * self.coefficient - health_bar_length / 2, 100 * self.coefficient - 20, health_bar_length, 15 * self.coefficient))  
-            pygame.draw.rect(self.screen, (255, 255, 0), (1500 * self.coefficient - health_bar_length / 2, 100 * self.coefficient - 20, health_bar_width, 12 * self.coefficient)) 
+            pygame.draw.rect(self.screen, (85, 85, 85), (1500 * self.coefficient - xp_bar_length / 2, 100 * self.coefficient - 20, xp_bar_length, 15 * self.coefficient))  
+            pygame.draw.rect(self.screen, (255, 255, 0), (1500 * self.coefficient - xp_bar_length / 2, 100 * self.coefficient - 20, xp_bar_width, 12 * self.coefficient)) 
 
-            # Отрисовка текста опыта
             xp_text = f"{self.selected_tower.xp} / {200 + 200 * self.selected_tower.xp_level} Xp Level {self.selected_tower.xp_level}"
             text_surface = tower_font.render(xp_text, True, (255, 255, 255))
             self.screen.blit(text_surface, (1400 * self.coefficient, 50 * self.coefficient))
@@ -356,7 +364,6 @@ class Game:
     def draw(self):
         self.screen.fill(self.settings.bg_color) 
         self.draw_grid()  
-        self.draw_cells()
         self.draw_info()
         
         button_rect = pygame.Rect(0, 960*self.coefficient, 140*self.coefficient, 40*self.coefficient)
@@ -406,17 +413,6 @@ class Game:
                     sys.exit()
                 if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False
-
-
-
-    def demolish_tower(self):
-        if self.selected_tower:
-            self.economy += self.selected_tower.price // 2
-            self.towers.remove(self.selected_tower) 
-            self.grid[self.selected_tower.position[1]][self.selected_tower.position[0]] = 0 
-            self.selected_tower = None 
-
-
 
     def run(self):
         settings = Settings() 

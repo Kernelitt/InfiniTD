@@ -1,5 +1,6 @@
 import pygame
 from enemy import Boss
+
 class Tower:
     def __init__(self, position,coefficient):
         self.coefficient = coefficient
@@ -350,7 +351,7 @@ class FarmTower(Tower):
         # Отрисовка башни
         pygame.draw.rect(screen, self.color, ((self.position[0] * 40 + 5)* self.coefficient, (self.position[1] * 40 + 5)* self.coefficient, self.size, self.size))
         pygame.draw.circle(screen, (225, 225, 70), ((self.position[0] * 40 + 20)* self.coefficient, (self.position[1] * 40 + 20)* self.coefficient), self.size/2)
-        level_text = self.font.render(f'{self.level}', True, (255, 255, 255))  # Белый цвет текста
+        level_text = self.font.render(f'{self.level}', True, (55, 55, 55))  # Белый цвет текста
         screen.blit(level_text, ((self.position[0] * 40 + 5)* self.coefficient, (self.position[1] * 40 + 5)* self.coefficient))
 
         if self.xp >= 200 + 200*self.xp_level:
