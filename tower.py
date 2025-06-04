@@ -133,13 +133,7 @@ class FastTower(Tower):
         self.level += 1  # Увеличиваем уровень
         self.upgrade_price = round(self.upgrade_price * 1.5)  # Обновляем стоимость улучшения
 
-    def check_collision(self, bullet, enemy):
 
-        # Создаем прямоугольник для пули
-        bullet_rect = pygame.Rect(bullet.position[0] - 5, bullet.position[1] - 5, 18, 18)  # Пуля размером 10x10
-    # Создаем прямоугольник для врага
-        enemy_rect = pygame.Rect(enemy.position[0], enemy.position[1], 15, 15)  # Враг размером 40x40
-        return bullet_rect.colliderect(enemy_rect)
 
 # Новый класс для быстрой башни
 class RocketTower(Tower):
@@ -188,12 +182,7 @@ class RocketTower(Tower):
                         self.last_shot_time = pygame.time.get_ticks()  # Обновляем время последнего выстрела
                     break  # Выход из цикла, если враг найден
 
-    def check_collision(self, bullet, enemy):
-        # Создаем прямоугольник для пули
-        bullet_rect = pygame.Rect(bullet.position[0] - 5, bullet.position[1] - 5, 15, 15)  # Пуля размером 10x10
-    # Создаем прямоугольник для врага
-        enemy_rect = pygame.Rect(enemy.position[0], enemy.position[1], 15, 15)  # Враг размером 40x40
-        return bullet_rect.colliderect(enemy_rect)
+
 
 class ExplosiveTower(Tower):
     def __init__(self, position,coefficient):
@@ -319,12 +308,7 @@ class OverclockTower(Tower):
         self.attack_speed = self.base_attack_speed
         
 
-    def check_collision(self, bullet, enemy):
-        # Создаем прямоугольник для пули
-        bullet_rect = pygame.Rect(bullet.position[0] - 5, bullet.position[1] - 5, 18, 18)  # Пуля размером 10x10
-        # Создаем прямоугольник для врага
-        enemy_rect = pygame.Rect(enemy.position[0], enemy.position[1], 15, 15)  # Враг размером 40x40
-        return bullet_rect.colliderect(enemy_rect)
+
     
 class FarmTower(Tower):
     def __init__(self, position,coefficient):

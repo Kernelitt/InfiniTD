@@ -48,6 +48,22 @@ class Game:
         self.selected_tower = None
         self.selected_tower_type = 'Basic'
         self.selected_tower_price = 24
+        self.tower_types = {
+            pygame.K_1: ('Basic', Tower((0, 0),self.coefficient).price),
+            pygame.K_2: ('Fast', FastTower((0, 0),self.coefficient).price),
+            pygame.K_3: ('Rocket', RocketTower((0, 0),self.coefficient).price),
+            pygame.K_4: ('Explosive', ExplosiveTower((0, 0),self.coefficient).price),
+            pygame.K_5: ('Overclock', OverclockTower((0, 0),self.coefficient).price),
+            pygame.K_6: ('Farm', FarmTower((0, 0),self.coefficient).price)
+        }
+        self.tower_classes = {
+            'Basic': Tower,
+            'Fast': FastTower,
+            'Rocket': RocketTower,
+            'Explosive': ExplosiveTower,
+            'Overclock': OverclockTower,
+            'Farm': FarmTower
+        }
         # Upgrades
         self.base_health = 20 + self.settings.load_data()["Upgrades"]["StartBaseHP"]
         self.economy = 50 + self.settings.load_data()["Upgrades"]["StartMoney"]
@@ -132,17 +148,11 @@ class Game:
                     if (0 <= mouse_x <= 140*self.coefficient and 960*self.coefficient <= mouse_y <= 1000*self.coefficient):
                         self.base_health = 0     
 
-            self.tower_types = {
-            pygame.K_1: ('Basic', Tower((0, 0),self.coefficient).price),
-            pygame.K_2: ('Fast', FastTower((0, 0),self.coefficient).price),
-            pygame.K_3: ('Rocket', RocketTower((0, 0),self.coefficient).price),
-            pygame.K_4: ('Explosive', ExplosiveTower((0, 0),self.coefficient).price),
-            pygame.K_5: ('Overclock', OverclockTower((0, 0),self.coefficient).price),
-            pygame.K_6: ('Farm', FarmTower((0, 0),self.coefficient).price)
-            }
+
             if event.type == pygame.KEYDOWN:
                 if event.key in self.tower_types:
                     self.selected_tower_type, self.selected_tower_price = self.tower_types[event.key]
+                    print(self.selected_tower_type,self.tower_types)
                 if event.key == pygame.K_SPACE:
                     if self.wave % 20 == 0 and self.wave_started == False:
                         self.enemies.append(Boss(self.path,(5 * self.wave * round(self.wave / 4)) * self.difficulty_multiplier,self.coefficient))
@@ -156,19 +166,9 @@ class Game:
             if self.grid[grid_y][grid_x] == 0: 
                 tower_class = None
                 
-                if self.selected_tower_type == 'Basic':
-                    tower_class = Tower
-                elif self.selected_tower_type == 'Fast':
-                    tower_class = FastTower
-                elif self.selected_tower_type == 'Rocket':
-                    tower_class = RocketTower
-                elif self.selected_tower_type == 'Explosive':
-                    tower_class = ExplosiveTower
-                elif self.selected_tower_type == 'Overclock':
-                    tower_class = OverclockTower
-                elif self.selected_tower_type == 'Farm':
-                    tower_class = FarmTower
-                
+                if self.selected_tower_type in self.tower_classes:
+                    tower_class = self.tower_classes[self.selected_tower_type] # Получаем класс башни
+
                 if tower_class is not None:
                     tower = tower_class((grid_x, grid_y), self.coefficient)
                     if self.economy >= tower.price: 
